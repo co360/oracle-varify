@@ -1,0 +1,17 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+configparser = "==5.0.0"
+jdcal = "==1.4.1"
+openpyxl = "==3.0.5"
+cx-Oracle = "==8.0.1"
+et_xmlfile = "==1.0.1"
+python-dotenv = "*"
+
+[requires]
+python_version = "3.7"
