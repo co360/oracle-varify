@@ -25,6 +25,7 @@ class SqliteDB:
         self.oracle_package = 'oracle_packages'
         self.oracle_sequence = 'oracle_sequences'
         self.oracle_type = 'oracle_types'
+        self.oracle_statistic = 'oracle_statistics'
 
     def __sqlite_drop_table(self, cursor, table):
         """ drop target table from sqlite """
@@ -54,6 +55,7 @@ class SqliteDB:
             self.__sqlite_drop_table(cursor, self.oracle_package)
             self.__sqlite_drop_table(cursor, self.oracle_sequence)
             self.__sqlite_drop_table(cursor, self.oracle_type)
+            self.__sqlite_drop_table(cursor, self.oracle_statistic)
 
     def __sqlite_oracle_table_create(self, cursor):
         """ create target table to sqlite """
@@ -76,6 +78,16 @@ class SqliteDB:
                     owner CHAR(100) NOT NULL,
                     tag CHAR(10) NOT NULL,
                     status CHAR(20) NOT NULL)'''
+                       )
+
+    def __sqlite_oracle_statistic_create(self, cursor):
+        """ create oracle statistic to sqlite """
+        cursor.execute(f'''
+                CREATE TABLE {self.oracle_statistic}(
+                    p_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name CHAR(100) NOT NULL,      
+                    value CHAR(100) NOT NULL,
+                    tag CHAR(10) NOT NULL)'''
                        )
 
     def __get_table_name(self, table_name):
@@ -109,6 +121,8 @@ class SqliteDB:
             result = self.oracle_sequence
         elif table_name == 'type':
             result = self.oracle_type
+        elif table_name == 'statictis':
+            result = self.oracle_statistic
 
         if not result:
             logging.error(f'Target table name {table_name} is not exist')
@@ -129,6 +143,18 @@ class SqliteDB:
                 tag = tag
                 status = row_line[2]
                 sql = f'INSERT INTO {table_name} VALUES (NULL,"{name}", "{owner}", "{tag}", "{status}")'
+                logging.info(f'insert into table sql is {sql}')
+                cursor.execute(sql)
+
+    def sqlite_oracle_statistic_insert(self, data, tag):
+        """ statistic oracle data """
+        if not data:
+            logging.warn(f'Target table {self.oracle_statistic} is empty')
+            return False
+        with sqlite3.connect(self.db) as connection:
+            cursor = connection.cursor()
+            for key, value in data.items():
+                sql = f'INSERT INTO {self.oracle_statistic} VALUES (NULL, "{key}", "{value}", "{tag}")'
                 logging.info(f'insert into table sql is {sql}')
                 cursor.execute(sql)
 
@@ -161,6 +187,7 @@ class SqliteDB:
                 cursor, self.oracle_sequence)
             self.__sqlite_oracle_common_table_create(
                 cursor, self.oracle_type)
+            self.__sqlite_oracle_statistic_create(cursor)
 
     def sqlite_table_insert(self, data, tag):
         """ create oracle table """

@@ -47,6 +47,22 @@ def collect_oracle_common_object(oracle_db, sqlite_db, object_name, user, tag):
     sqlite_db.sqlite_oracle_common_table_insert(user_objects, object_name, tag)
 
 
+def collect_oracle_statistic_data(oracle_db, sqlite_db, tag):
+    """ collect oracle statistic data """
+    oracle_version = oracle_db.get_oracle_version()
+    oracle_charcode = oracle_db.get_oracle_charcode()
+    oracle_nls_comp = oracle_db.get_oracle_nls_comp()
+    oracle_nls_sort = oracle_db.get_oracle_nls_sort()
+    oracle_page_size = oracle_db.get_oracle_page_size()
+    sqlite_db.sqlite_oracle_statistic_insert({
+        'oracle_version': oracle_version,
+        'oracle_charcode': oracle_charcode,
+        'oracle_nls_comp': oracle_nls_comp,
+        'oracle_nls_sort': oracle_nls_sort,
+        'oracle_page_size': oracle_page_size,
+    }, tag)
+
+
 def collect_oracle_data(sqlite_db, config, users, tag):
     """ collect oracle data and insert data to sqlite """
     oracle_db = OracleDB(config)
@@ -58,8 +74,9 @@ def collect_oracle_data(sqlite_db, config, users, tag):
         return False
 
     oracle_db.env_init()
+    collect_oracle_statistic_data(oracle_db, sqlite_db, tag)
 
-    for user in users:
+    # for user in users:
         # collect_oracle_tables(oracle_db, sqlite_db, user, tag)
         # collect_oracle_common_object(oracle_db, sqlite_db, 'view', user, tag)
         # collect_oracle_common_object(oracle_db, sqlite_db, 'job', user, tag)
@@ -81,8 +98,8 @@ def collect_oracle_data(sqlite_db, config, users, tag):
         #     oracle_db, sqlite_db, 'package', user, tag)
         # collect_oracle_common_object(
         #     oracle_db, sqlite_db, 'sequence', user, tag)
-        collect_oracle_common_object(
-            oracle_db, sqlite_db, 'type', user, tag)
+        # collect_oracle_common_object(
+        #     oracle_db, sqlite_db, 'type', user, tag)
 
 
 def sqlite_db_reset(sqlite_db):

@@ -178,26 +178,40 @@ class OracleDB:
         return result
 
     def get_oracle_version(self):
+        """ get oracle version """
         sql = self.get_sql_from_ini('get_oracle_version')
-        basicInfo = [item for item in self.cursor.execute(sql)][1]
-        result = '-'.join(basicInfo)
-        return result
+        oracle_version = [item[0] for item in self.cursor.execute(sql)][0]
+        return oracle_version
 
-    def get_database_name(self):
-        sql = self.get_sql_from_ini('get_database_name')
-        database_name = [item[0] for item in self.cursor.execute(sql)][0]
-        return database_name
 
-    def get_storage_type(self):
-        sql = self.get_sql_from_ini('get_storage_type')
-        storage_type = [item for item in self.cursor.execute(sql)][0]
-        result = '-'.join(storage_type)
-        return result
-
-    def get_charcode(self):
-        sql = self.get_sql_from_ini('get_charcode')
-        charcode = [item for item in self.cursor.execute(sql)][0]
+    def get_oracle_charcode(self):
+        """ get oracle char code """
+        sql = self.get_sql_from_ini('get_oracle_charcode')
+        charcode = [item[0] for item in self.cursor.execute(sql)]
         result = '-'.join(charcode)
+        return result
+
+    def get_oracle_page_size(self):
+        """ get oracle page size """
+        sql = self.get_sql_from_ini('get_oracle_page_size')
+        pagesize = [item for item in self.cursor.execute(sql)][0]
+        result = '-'.join(pagesize)
+        return result
+
+    def get_oracle_nls_comp(self):
+        """ get oracle nls comp """
+        sql = self.get_sql_from_ini('get_oracle_nls_comp')
+        nls_comp = [item for item in self.cursor.execute(sql)][0]
+        nls_comp = [ str(item) for item in nls_comp]
+        result = '-'.join(nls_comp)
+        return result
+
+    def get_oracle_nls_sort(self):
+        """ get oracle nls sort """
+        sql = self.get_sql_from_ini('get_oracle_nls_sort')
+        nls_sort = [item for item in self.cursor.execute(sql)][0]
+        nls_sort = [ str(item) for item in nls_sort]
+        result = '-'.join(nls_sort)
         return result
 
     def get_user_objects(self, user, object_name):
