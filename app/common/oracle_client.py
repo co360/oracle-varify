@@ -100,6 +100,13 @@ class OracleDB:
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
+    def get_user_packages(self, user):
+        """ get user packages """
+        sql = self.get_sql_from_ini('get_user_package')
+        sql = sql.format(owner=user)
+        result = [list(item) for item in self.cursor.execute(sql)]
+        return result
+
     def get_user_table_pratitions(self, user):
         """ get user table_partitions """
         sql = self.get_sql_from_ini('get_user_table_partition_status')
@@ -202,6 +209,8 @@ class OracleDB:
             result = self.get_user_indexs(user)
         elif object_name == 'table_partition':
             result = self.get_user_table_pratitions(user)
+        elif object_name == 'package':
+            result = self.get_user_packages(user)
         else:
             logging.error(f'Target object {object_name} is error')
             return False
