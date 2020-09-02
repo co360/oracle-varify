@@ -12,6 +12,7 @@
 import os
 import logging
 from configparser import ConfigParser
+from .export_objexts_statistic_excel import export_objexts_statistic_excel
 from ..common.oracle_client import OracleDB
 from ..models import SqliteDB
 
@@ -129,3 +130,5 @@ def collect_oracle_init():
 
     collect_oracle_data(sqlite_db, source_oracle_config, users, 'source')
     collect_oracle_data(sqlite_db, dest_oracle_config, users, 'dest')
+
+    export_objexts_statistic_excel()

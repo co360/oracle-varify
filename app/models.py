@@ -26,6 +26,8 @@ class SqliteDB:
         self.oracle_sequence = 'oracle_sequences'
         self.oracle_type = 'oracle_types'
         self.oracle_statistic = 'oracle_statistics'
+    
+
 
     def __sqlite_drop_table(self, cursor, table):
         """ drop target table from sqlite """

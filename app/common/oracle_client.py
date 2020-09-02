@@ -13,14 +13,15 @@ import cx_Oracle
 import json
 import logging
 import time
-from configparser import ConfigParser
-import os
+from .common import get_data_from_ini_file
 
 
 class OracleDB:
     def __init__(self, data):
         self.data = data
         self.db = None
+        self.ini_path = 'app/common/oracle_sql.ini'
+        self.ini_container = 'oracle_sql'
         logging.info(f'======= {data}')
 
     def connect_oracle(self):
@@ -44,30 +45,14 @@ class OracleDB:
             self.connect_oracle()
         self.cursor = self.db.cursor()
 
-    def get_sql_from_ini(self, key):
-        config = ConfigParser()
-        cur_dir = os.path.dirname(os.path.abspath('__file__'))
-        config_path = os.path.join(cur_dir, 'app/common/oracle_sql.ini')
-        if not os.path.exists(config_path):
-            logging.error(f'{config_path} is not exist, please check')
-            return False
-
-        config.read(config_path)
-        oracle_sql = config['oracle_sql']
-        if key in oracle_sql:
-            return oracle_sql.get(key)
-        else:
-            logging.error(f'Target key is not exist')
-            return False
-
     def __get_user_table_status(self, user):
-        sql = self.get_sql_from_ini('get_user_table_status')
+        sql = get_data_from_ini_file(self.ini_path, self.ini_container, 'get_user_table_status')
         sql = sql.format(owner=user)
         logging.info(f'====== table sql is {sql}')
         return {item[1]: list(item) for item in self.cursor.execute(sql)}
 
     def __get_user_table_num_rows(self, user):
-        sql = self.get_sql_from_ini('get_user_table_num_rows')
+        sql = get_data_from_ini_file(self.ini_path, self.ini_container, 'get_user_table_num_rows')
         sql = sql.format(owner=user)
         logging.info(f'====== table sql is {sql}')
         return {item[0]: str(item[1]) for item in self.cursor.execute(sql)}
@@ -88,119 +73,119 @@ class OracleDB:
 
     def get_user_views(self, user):
         """ get user views """
-        sql = self.get_sql_from_ini('get_user_view_status')
+        sql = get_data_from_ini_file(self.ini_path, self.ini_container, 'get_user_view_status')
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
     def get_user_jobs(self, user):
         """ get user jobs """
-        sql = self.get_sql_from_ini('get_user_job_status')
+        sql = get_data_from_ini_file(self.ini_path, self.ini_container, 'get_user_job_status')
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
     def get_user_types(self, user):
         """ get user type """
-        sql = self.get_sql_from_ini('get_user_type_status')
+        sql = get_data_from_ini_file(self.ini_path, self.ini_container, 'get_user_type_status')
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
     def get_user_sequences(self, user):
         """ get user sequences """
-        sql = self.get_sql_from_ini('get_user_sequence_status')
+        sql = get_data_from_ini_file(self.ini_path, self.ini_container, 'get_user_sequence_status')
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
     def get_user_packages(self, user):
         """ get user packages """
-        sql = self.get_sql_from_ini('get_user_package')
+        sql = get_data_from_ini_file(self.ini_path, self.ini_container, 'get_user_package')
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
     def get_user_table_pratitions(self, user):
         """ get user table_partitions """
-        sql = self.get_sql_from_ini('get_user_table_partition_status')
+        sql = get_data_from_ini_file(self.ini_path, self.ini_container, 'get_user_table_partition_status')
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
     def get_user_indexs(self, user):
         """ get user indexs """
-        sql = self.get_sql_from_ini('get_user_index_status')
+        sql = get_data_from_ini_file(self.ini_path, self.ini_container, 'get_user_index_status')
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
     def get_user_procedures(self, user):
         """ get user procedures """
-        sql = self.get_sql_from_ini('get_user_procedure_status')
+        sql = get_data_from_ini_file(self.ini_path, self.ini_container, 'get_user_procedure_status')
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
     def get_user_functions(self, user):
         """ get user functions """
-        sql = self.get_sql_from_ini('get_user_function_status')
+        sql = get_data_from_ini_file(self.ini_path, self.ini_container, 'get_user_function_status')
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
     def get_user_dblinks(self, user):
         """ get user dblinks """
-        sql = self.get_sql_from_ini('get_user_dblink')
+        sql = get_data_from_ini_file(self.ini_path, self.ini_container, 'get_user_dblink')
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
     def get_user_triggers(self, user):
         """ get user triggers """
-        sql = self.get_sql_from_ini('get_user_triggers')
+        sql = get_data_from_ini_file(self.ini_path, self.ini_container, 'get_user_triggers')
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
     def get_user_materialized_views(self, user):
         """ get user materialized_view """
-        sql = self.get_sql_from_ini('get_user_materialized_view')
+        sql = get_data_from_ini_file(self.ini_path, self.ini_container, 'get_user_materialized_view')
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
     def get_user_synonyms(self, user):
         """ get user synonyms """
-        sql = self.get_sql_from_ini('get_user_synonym_status')
+        sql = get_data_from_ini_file(self.ini_path, self.ini_container, 'get_user_synonym_status')
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
     def get_oracle_version(self):
         """ get oracle version """
-        sql = self.get_sql_from_ini('get_oracle_version')
+        sql = get_data_from_ini_file(self.ini_path, self.ini_container, 'get_oracle_version')
         oracle_version = [item[0] for item in self.cursor.execute(sql)][0]
         return oracle_version
 
 
     def get_oracle_charcode(self):
         """ get oracle char code """
-        sql = self.get_sql_from_ini('get_oracle_charcode')
+        sql = get_data_from_ini_file(self.ini_path, self.ini_container, 'get_oracle_charcode')
         charcode = [item[0] for item in self.cursor.execute(sql)]
         result = '-'.join(charcode)
         return result
 
     def get_oracle_page_size(self):
         """ get oracle page size """
-        sql = self.get_sql_from_ini('get_oracle_page_size')
+        sql = get_data_from_ini_file(self.ini_path, self.ini_container, 'get_oracle_page_size')
         pagesize = [item for item in self.cursor.execute(sql)][0]
         result = '-'.join(pagesize)
         return result
 
     def get_oracle_nls_comp(self):
         """ get oracle nls comp """
-        sql = self.get_sql_from_ini('get_oracle_nls_comp')
+        sql = get_data_from_ini_file(self.ini_path, self.ini_container, 'get_oracle_nls_comp')
         nls_comp = [item for item in self.cursor.execute(sql)][0]
         nls_comp = [ str(item) for item in nls_comp]
         result = '-'.join(nls_comp)
@@ -208,7 +193,7 @@ class OracleDB:
 
     def get_oracle_nls_sort(self):
         """ get oracle nls sort """
-        sql = self.get_sql_from_ini('get_oracle_nls_sort')
+        sql = get_data_from_ini_file(self.ini_path, self.ini_container, 'get_oracle_nls_sort')
         nls_sort = [item for item in self.cursor.execute(sql)][0]
         nls_sort = [ str(item) for item in nls_sort]
         result = '-'.join(nls_sort)
