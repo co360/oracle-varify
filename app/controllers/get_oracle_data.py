@@ -77,8 +77,10 @@ def collect_oracle_data(sqlite_db, config, users, tag):
         #     oracle_db, sqlite_db, 'index', user, tag)
         # collect_oracle_common_object(
         #     oracle_db, sqlite_db, 'table_partition', user, tag)
+        # collect_oracle_common_object(
+        #     oracle_db, sqlite_db, 'package', user, tag)
         collect_oracle_common_object(
-            oracle_db, sqlite_db, 'package', user, tag)
+            oracle_db, sqlite_db, 'sequence', user, tag)
 
 def sqlite_db_reset(sqlite_db):
     """ delete sqlite all tables """
