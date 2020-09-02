@@ -97,18 +97,18 @@ def sqlite_db_reset(sqlite_db):
 
 def collect_oracle_init():
     """ start to collect oracle init """
-    # ini_path = 'config.ini'
-    # source_oracle_config = get_all_data_from_ini_file(ini_path, 'source')
-    # dest_oracle_config = get_all_data_from_ini_file(ini_path, 'dest')
-    # dvt_config = get_all_data_from_ini_file(ini_path, 'dvt')
-    # target_users = dvt_config['verify_schema']
+    ini_path = 'config.ini'
+    source_oracle_config = get_all_data_from_ini_file(ini_path, 'source')
+    dest_oracle_config = get_all_data_from_ini_file(ini_path, 'dest')
+    dvt_config = get_all_data_from_ini_file(ini_path, 'dvt')
+    target_users = dvt_config['verify_schema']
 
-    # if not target_users:
-        # logging.error(
-            # # 'verify_schema is empty, please input verify_schema for config.ini')
-        # return False
+    if not target_users:
+        logging.error(
+            'verify_schema is empty, please input verify_schema for config.ini')
+        return False
 
-    # users = target_users.split(',')
+    users = target_users.split(',')
 
     # sqlite_db = SqliteDB()
     # sqlite_db_reset(sqlite_db)
@@ -116,4 +116,4 @@ def collect_oracle_init():
     # collect_oracle_data(sqlite_db, source_oracle_config, users, 'source')
     # collect_oracle_data(sqlite_db, dest_oracle_config, users, 'dest')
 
-    ExportOracleObjectsStaticticExcel()
+    ExportOracleObjectsStaticticExcel(users)
