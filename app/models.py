@@ -13,6 +13,7 @@ class SqliteDB:
         self.db = os.path.join(cur_dir, model_path)
         self.oracle_table = 'oracle_tables'
         self.oracle_view = 'oracle_views'
+        self.oracle_job = 'oracle_jobs'
 
     def __sqlite_drop_table(self, cursor, table):
         """ drop target table from sqlite """
@@ -30,6 +31,7 @@ class SqliteDB:
             cursor = connection.cursor()
             self.__sqlite_drop_table(cursor, self.oracle_table)
             self.__sqlite_drop_table(cursor, self.oracle_view)
+            self.__sqlite_drop_table(cursor, self.oracle_job)
 
     def __sqlite_oracle_table_create(self, cursor):
         """ create target table to sqlite """
@@ -61,6 +63,8 @@ class SqliteDB:
             result = self.oracle_table
         elif table_name == 'view':
             result = self.oracle_view
+        elif table_name == 'job':
+            result = self.oracle_job
         
         if not result:
             logging.error(f'Target table name {table_name} is not exist')
@@ -69,6 +73,9 @@ class SqliteDB:
 
     def sqlite_oracle_common_table_insert(self, data, table_name, tag):
         """ insert common ddl table to sqlite """
+        if not data:
+            logging.warn(f'Target table {table_name} is empty')
+            return False
         table_name = self.__get_table_name(table_name)
         with sqlite3.connect(self.db) as connection:
             cursor = connection.cursor()
@@ -87,6 +94,7 @@ class SqliteDB:
             cursor = connection.cursor()
             self.__sqlite_oracle_table_create(cursor)
             self.__sqlite_oracle_common_table_create(cursor, self.oracle_view)
+            self.__sqlite_oracle_common_table_create(cursor, self.oracle_job)
 
     def sqlite_table_insert(self, data, tag):
         """ create oracle table """

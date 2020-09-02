@@ -39,11 +39,13 @@ def collect_oracle_tables(oracle_db, sqlite_db, user, tag):
     sqlite_db.sqlite_table_insert(user_tables, tag)
     logging.info(f'{user} table is {user_tables}')
 
+
 def collect_oracle_common_object(oracle_db, sqlite_db, object_name, user, tag):
     """ collect common objects data """
     user_objects = oracle_db.get_user_objects(user, object_name)
     logging.info(f'====== {user_objects}')
-    sqlite_db.sqlite_oracle_common_table_insert(user_objects, 'view', tag)
+    sqlite_db.sqlite_oracle_common_table_insert(user_objects, object_name, tag)
+
 
 def collect_oracle_data(sqlite_db, config, users, tag):
     """ collect oracle data and insert data to sqlite """
@@ -59,7 +61,8 @@ def collect_oracle_data(sqlite_db, config, users, tag):
 
     for user in users:
         # collect_oracle_tables(oracle_db, sqlite_db, user, tag)
-        collect_oracle_common_object(oracle_db, sqlite_db, 'view', user, tag)
+        # collect_oracle_common_object(oracle_db, sqlite_db, 'view', user, tag)
+        collect_oracle_common_object(oracle_db, sqlite_db, 'job', user, tag)
 
 
 def sqlite_db_reset(sqlite_db):

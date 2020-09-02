@@ -87,7 +87,15 @@ class OracleDB:
         return result
 
     def get_user_views(self, user):
+        """ get user views """
         sql = self.get_sql_from_ini('get_user_view_status')
+        sql = sql.format(owner=user)
+        result = [list(item) for item in self.cursor.execute(sql)]
+        return result
+
+    def get_user_jobs(self, user):
+        """ get user jobs """
+        sql = self.get_sql_from_ini('get_user_job_status')
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
@@ -179,8 +187,9 @@ class OracleDB:
         result = None
         if object_name == 'view':
             result = self.get_user_views(user)
-        
-        if not result:
+        elif object_name == 'job':
+            result = self.get_user_jobs(user)
+        else:
             logging.error(f'Target object {object_name} is error')
             return False
         return result
