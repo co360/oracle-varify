@@ -13,6 +13,7 @@ import cx_Oracle
 import json
 import logging
 import time
+import os
 from .common import get_data_from_ini_file
 
 
@@ -20,7 +21,7 @@ class OracleDB:
     def __init__(self, data):
         self.data = data
         self.db = None
-        self.ini_path = 'app/common/oracle_sql.ini'
+        self.ini_path = os.path.join('app', 'common', 'oracle_sql.ini')
         self.ini_container = 'oracle_sql'
         logging.info(f'======= {data}')
 

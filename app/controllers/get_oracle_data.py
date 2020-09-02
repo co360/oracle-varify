@@ -14,24 +14,8 @@ import logging
 from configparser import ConfigParser
 from .export_objexts_statistic_excel import export_objexts_statistic_excel
 from ..common.oracle_client import OracleDB
+from ..common.common import get_all_data_from_ini_file
 from ..models import SqliteDB
-
-
-def get_data_from_oracle_config(type):
-    cur_dir = os.path.dirname(os.path.abspath('__file__'))
-    config_path = 'config.ini'
-    config_abs_path = os.path.join(cur_dir, config_path)
-    logging.info(f'config path is {config_abs_path}')
-
-    config = ConfigParser()
-    config.read(config_abs_path)
-
-    if type in config:
-        result = config[type]
-        return dict(result)
-    else:
-        logging.error(f'{type} is not exist in config.ini')
-        return False
 
 
 def collect_oracle_tables(oracle_db, sqlite_db, user, tag):
@@ -113,9 +97,10 @@ def sqlite_db_reset(sqlite_db):
 
 def collect_oracle_init():
     """ start to collect oracle init """
-    source_oracle_config = get_data_from_oracle_config('source')
-    dest_oracle_config = get_data_from_oracle_config('dest')
-    dvt_config = get_data_from_oracle_config('dvt')
+    ini_path = 'config.ini'
+    source_oracle_config = get_all_data_from_ini_file(ini_path, 'source')
+    dest_oracle_config = get_all_data_from_ini_file(ini_path, 'dest')
+    dvt_config = get_all_data_from_ini_file(ini_path, 'dvt')
     target_users = dvt_config['verify_schema']
 
     if not target_users:
