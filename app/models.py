@@ -16,12 +16,13 @@ class SqliteDB:
         self.oracle_job = 'oracle_jobs'
         self.oracle_synonym = 'oracle_synonyms'
         self.oracle_materialized_view = 'oracle_materialized_views'
+        self.oracle_trigger = 'oracle_triggers'
 
     def __sqlite_drop_table(self, cursor, table):
         """ drop target table from sqlite """
         check_table = f"select count(*) from sqlite_master where type='table' and name='{table}'"
         logging.info(f'check table sql is {check_table}')
-        table_status = [ item[0] for item in cursor.execute(check_table) ][0]
+        table_status = [item[0] for item in cursor.execute(check_table)][0]
         logging.info(f'status is {table_status}')
         if table_status:
             logging.warn(f'table {table} is exist, drop it')
@@ -36,6 +37,7 @@ class SqliteDB:
             self.__sqlite_drop_table(cursor, self.oracle_job)
             self.__sqlite_drop_table(cursor, self.oracle_synonym)
             self.__sqlite_drop_table(cursor, self.oracle_materialized_view)
+            self.__sqlite_drop_table(cursor, self.oracle_trigger)
 
     def __sqlite_oracle_table_create(self, cursor):
         """ create target table to sqlite """
@@ -73,7 +75,9 @@ class SqliteDB:
             result = self.oracle_synonym
         elif table_name == 'materialized_view':
             result = self.oracle_materialized_view
-        
+        elif table_name == 'trigger':
+            result = self.oracle_trigger
+
         if not result:
             logging.error(f'Target table name {table_name} is not exist')
             return False
@@ -103,8 +107,12 @@ class SqliteDB:
             self.__sqlite_oracle_table_create(cursor)
             self.__sqlite_oracle_common_table_create(cursor, self.oracle_view)
             self.__sqlite_oracle_common_table_create(cursor, self.oracle_job)
-            self.__sqlite_oracle_common_table_create(cursor, self.oracle_synonym)
-            self.__sqlite_oracle_common_table_create(cursor, self.oracle_materialized_view)
+            self.__sqlite_oracle_common_table_create(
+                cursor, self.oracle_synonym)
+            self.__sqlite_oracle_common_table_create(
+                cursor, self.oracle_materialized_view)
+            self.__sqlite_oracle_common_table_create(
+                cursor, self.oracle_trigger)
 
     def sqlite_table_insert(self, data, tag):
         """ create oracle table """

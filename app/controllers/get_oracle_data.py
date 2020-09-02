@@ -64,7 +64,9 @@ def collect_oracle_data(sqlite_db, config, users, tag):
         # collect_oracle_common_object(oracle_db, sqlite_db, 'view', user, tag)
         # collect_oracle_common_object(oracle_db, sqlite_db, 'job', user, tag)
         # collect_oracle_common_object(oracle_db, sqlite_db, 'synonym', user, tag)
-        collect_oracle_common_object(oracle_db, sqlite_db, 'materialized_view', user, tag)
+        # collect_oracle_common_object(oracle_db, sqlite_db, 'materialized_view', user, tag)
+        collect_oracle_common_object(
+            oracle_db, sqlite_db, 'trigger', user, tag)
 
 
 def sqlite_db_reset(sqlite_db):

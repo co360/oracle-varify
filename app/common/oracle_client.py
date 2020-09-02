@@ -100,6 +100,13 @@ class OracleDB:
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
+    def get_user_triggers(self, user):
+        """ get user triggers """
+        sql = self.get_sql_from_ini('get_user_triggers')
+        sql = sql.format(owner=user)
+        result = [list(item) for item in self.cursor.execute(sql)]
+        return result
+
     def get_user_materialized_views(self, user):
         """ get user materialized_view """
         sql = self.get_sql_from_ini('get_user_materialized_view')
@@ -112,18 +119,6 @@ class OracleDB:
         sql = self.get_sql_from_ini('get_user_synonym_status')
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
-        return result
-
-    def get_user_triggers(self, user):
-        sql = self.get_sql_from_ini('get_user_triggers')
-        sql = sql.format(owner=user)
-        result = {item[0] for item in self.cursor.execute(sql)}
-        return result
-
-    def get_user_packages(self, user):
-        sql = self.get_sql_from_ini('get_user_packages')
-        sql = sql.format(owner=user)
-        result = {item[0] for item in self.cursor.execute(sql)}
         return result
 
     def get_oracle_version(self):
@@ -160,6 +155,8 @@ class OracleDB:
             result = self.get_user_synonyms(user)
         elif object_name == 'materialized_view':
             result = self.get_user_materialized_views(user)
+        elif object_name == 'trigger':
+            result = self.get_user_triggers(user)
         else:
             logging.error(f'Target object {object_name} is error')
             return False
