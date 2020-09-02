@@ -20,6 +20,7 @@ class SqliteDB:
         self.oracle_dblink = 'oracle_dblinks'
         self.oracle_function = 'oracle_functions'
         self.oracle_procedure = 'oracle_procedures'
+        self.oracle_index = 'oracle_indexs'
 
     def __sqlite_drop_table(self, cursor, table):
         """ drop target table from sqlite """
@@ -44,6 +45,7 @@ class SqliteDB:
             self.__sqlite_drop_table(cursor, self.oracle_dblink)
             self.__sqlite_drop_table(cursor, self.oracle_function)
             self.__sqlite_drop_table(cursor, self.oracle_procedure)
+            self.__sqlite_drop_table(cursor, self.oracle_index)
 
     def __sqlite_oracle_table_create(self, cursor):
         """ create target table to sqlite """
@@ -89,6 +91,8 @@ class SqliteDB:
             result = self.oracle_function
         elif table_name == 'procedure':
             result = self.oracle_procedure
+        elif table_name == 'index':
+            result = self.oracle_index
 
         if not result:
             logging.error(f'Target table name {table_name} is not exist')
@@ -131,6 +135,8 @@ class SqliteDB:
                 cursor, self.oracle_function)
             self.__sqlite_oracle_common_table_create(
                 cursor, self.oracle_procedure)
+            self.__sqlite_oracle_common_table_create(
+                cursor, self.oracle_index)
 
     def sqlite_table_insert(self, data, tag):
         """ create oracle table """

@@ -100,6 +100,13 @@ class OracleDB:
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
+    def get_user_indexs(self, user):
+        """ get user indexs """
+        sql = self.get_sql_from_ini('get_user_index_status')
+        sql = sql.format(owner=user)
+        result = [list(item) for item in self.cursor.execute(sql)]
+        return result
+
     def get_user_procedures(self, user):
         """ get user procedures """
         sql = self.get_sql_from_ini('get_user_procedure_status')
@@ -184,6 +191,8 @@ class OracleDB:
             result = self.get_user_functions(user)
         elif object_name == 'procedure':
             result = self.get_user_procedures(user)
+        elif object_name == 'index':
+            result = self.get_user_indexs(user)
         else:
             logging.error(f'Target object {object_name} is error')
             return False
