@@ -76,30 +76,32 @@ def collect_oracle_data(sqlite_db, config, users, tag):
     oracle_db.env_init()
     collect_oracle_statistic_data(oracle_db, sqlite_db, tag)
 
-    # for user in users:
-        # collect_oracle_tables(oracle_db, sqlite_db, user, tag)
-        # collect_oracle_common_object(oracle_db, sqlite_db, 'view', user, tag)
-        # collect_oracle_common_object(oracle_db, sqlite_db, 'job', user, tag)
-        # collect_oracle_common_object(oracle_db, sqlite_db, 'synonym', user, tag)
-        # collect_oracle_common_object(oracle_db, sqlite_db, 'materialized_view', user, tag)
-        # collect_oracle_common_object(
-        # oracle_db, sqlite_db, 'trigger', user, tag)
-        # collect_oracle_common_object(
-        # oracle_db, sqlite_db, 'dblink', user, tag)
-        # collect_oracle_common_object(
-        #     oracle_db, sqlite_db, 'function', user, tag)
-        # collect_oracle_common_object(
-        #     oracle_db, sqlite_db, 'procedure', user, tag)
-        # collect_oracle_common_object(
-        #     oracle_db, sqlite_db, 'index', user, tag)
-        # collect_oracle_common_object(
-        #     oracle_db, sqlite_db, 'table_partition', user, tag)
-        # collect_oracle_common_object(
-        #     oracle_db, sqlite_db, 'package', user, tag)
-        # collect_oracle_common_object(
-        #     oracle_db, sqlite_db, 'sequence', user, tag)
-        # collect_oracle_common_object(
-        #     oracle_db, sqlite_db, 'type', user, tag)
+    for user in users:
+        collect_oracle_tables(oracle_db, sqlite_db, user, tag)
+        collect_oracle_common_object(oracle_db, sqlite_db, 'view', user, tag)
+        collect_oracle_common_object(oracle_db, sqlite_db, 'job', user, tag)
+        collect_oracle_common_object(
+            oracle_db, sqlite_db, 'synonym', user, tag)
+        collect_oracle_common_object(
+            oracle_db, sqlite_db, 'materialized_view', user, tag)
+        collect_oracle_common_object(
+            oracle_db, sqlite_db, 'trigger', user, tag)
+        collect_oracle_common_object(
+            oracle_db, sqlite_db, 'dblink', user, tag)
+        collect_oracle_common_object(
+            oracle_db, sqlite_db, 'function', user, tag)
+        collect_oracle_common_object(
+            oracle_db, sqlite_db, 'procedure', user, tag)
+        collect_oracle_common_object(
+            oracle_db, sqlite_db, 'index', user, tag)
+        collect_oracle_common_object(
+            oracle_db, sqlite_db, 'table_partition', user, tag)
+        collect_oracle_common_object(
+            oracle_db, sqlite_db, 'package', user, tag)
+        collect_oracle_common_object(
+            oracle_db, sqlite_db, 'sequence', user, tag)
+        collect_oracle_common_object(
+            oracle_db, sqlite_db, 'type', user, tag)
 
 
 def sqlite_db_reset(sqlite_db):
