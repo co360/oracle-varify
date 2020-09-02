@@ -100,6 +100,13 @@ class OracleDB:
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
+    def get_user_dblinks(self, user):
+        """ get user dblinks """
+        sql = self.get_sql_from_ini('get_user_dblink')
+        sql = sql.format(owner=user)
+        result = [list(item) for item in self.cursor.execute(sql)]
+        return result
+
     def get_user_triggers(self, user):
         """ get user triggers """
         sql = self.get_sql_from_ini('get_user_triggers')
@@ -157,6 +164,8 @@ class OracleDB:
             result = self.get_user_materialized_views(user)
         elif object_name == 'trigger':
             result = self.get_user_triggers(user)
+        elif object_name == 'dblink':
+            result = self.get_user_dblinks(user)
         else:
             logging.error(f'Target object {object_name} is error')
             return False

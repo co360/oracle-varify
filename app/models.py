@@ -17,6 +17,7 @@ class SqliteDB:
         self.oracle_synonym = 'oracle_synonyms'
         self.oracle_materialized_view = 'oracle_materialized_views'
         self.oracle_trigger = 'oracle_triggers'
+        self.oracle_dblink = 'oracle_dblinks'
 
     def __sqlite_drop_table(self, cursor, table):
         """ drop target table from sqlite """
@@ -38,6 +39,7 @@ class SqliteDB:
             self.__sqlite_drop_table(cursor, self.oracle_synonym)
             self.__sqlite_drop_table(cursor, self.oracle_materialized_view)
             self.__sqlite_drop_table(cursor, self.oracle_trigger)
+            self.__sqlite_drop_table(cursor, self.oracle_dblink)
 
     def __sqlite_oracle_table_create(self, cursor):
         """ create target table to sqlite """
@@ -77,6 +79,8 @@ class SqliteDB:
             result = self.oracle_materialized_view
         elif table_name == 'trigger':
             result = self.oracle_trigger
+        elif table_name == 'dblink':
+            result = self.oracle_dblink
 
         if not result:
             logging.error(f'Target table name {table_name} is not exist')
@@ -113,6 +117,8 @@ class SqliteDB:
                 cursor, self.oracle_materialized_view)
             self.__sqlite_oracle_common_table_create(
                 cursor, self.oracle_trigger)
+            self.__sqlite_oracle_common_table_create(
+                cursor, self.oracle_dblink)
 
     def sqlite_table_insert(self, data, tag):
         """ create oracle table """
