@@ -42,7 +42,7 @@ def collect_oracle_data(config, users):
     oracle_db.env_init()
 
     for user in users:
-        user_tables = oracle_db.get_user_tables(user)
+        user_tables = oracle_db.get_user_tables_data(user)
         logging.info(f'{user} table is {user_tables}')
 
 
@@ -59,4 +59,4 @@ def collect_oracle_init():
 
     users = target_users.split(',')
     source_oracle_objects = collect_oracle_data(source_oracle_config, users)
-    dest_oracle_objects = collect_oracle_data(dest_oracle_config, users)
+    # dest_oracle_objects = collect_oracle_data(dest_oracle_config, users)

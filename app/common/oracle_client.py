@@ -60,11 +60,31 @@ class OracleDB:
             logging.error(f'Target key is not exist')
             return False
 
-    def get_user_tables(self, user):
-        sql = self.get_sql_from_ini('get_user_tables')
-        sql = sql.format(OWNER=user)
+    def __get_user_table_status(self, user):
+        sql = self.get_sql_from_ini('get_user_table_status')
+        sql = sql.format(owner=user)
         logging.info(f'====== table sql is {sql}')
-        return [item for item in self.cursor.execute(sql)]
+        return {item[1]: list(item) for item in self.cursor.execute(sql)}
+
+    def __get_user_table_num_rows(self, user):
+        sql = self.get_sql_from_ini('get_user_table_num_rows')
+        sql = sql.format(owner=user)
+        logging.info(f'====== table sql is {sql}')
+        return {item[0]: str(item[1]) for item in self.cursor.execute(sql)}
+
+    def get_user_tables_data(self, user):
+        user_table_status = self.__get_user_table_status(user)
+        user_table_num_rows = self.__get_user_table_num_rows(user)
+        result = []
+
+        for table_name, table_data in user_table_status.items():
+            table_line = table_data
+            if table_name in user_table_num_rows:
+                table_data.append(user_table_num_rows[table_name])
+            else:
+                table_line.append('None')
+            result.append(table_line)
+        return result
 
     def get_all_users(self):
         sql = self.get_sql_from_ini('get_all_users')
