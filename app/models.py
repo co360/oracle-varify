@@ -24,6 +24,7 @@ class SqliteDB:
         self.oracle_table_partition = 'oracle_table_partitions'
         self.oracle_package = 'oracle_packages'
         self.oracle_sequence = 'oracle_sequences'
+        self.oracle_type = 'oracle_types'
 
     def __sqlite_drop_table(self, cursor, table):
         """ drop target table from sqlite """
@@ -52,6 +53,7 @@ class SqliteDB:
             self.__sqlite_drop_table(cursor, self.oracle_table_partition)
             self.__sqlite_drop_table(cursor, self.oracle_package)
             self.__sqlite_drop_table(cursor, self.oracle_sequence)
+            self.__sqlite_drop_table(cursor, self.oracle_type)
 
     def __sqlite_oracle_table_create(self, cursor):
         """ create target table to sqlite """
@@ -105,6 +107,8 @@ class SqliteDB:
             result = self.oracle_package
         elif table_name == 'sequence':
             result = self.oracle_sequence
+        elif table_name == 'type':
+            result = self.oracle_type
 
         if not result:
             logging.error(f'Target table name {table_name} is not exist')
@@ -155,6 +159,8 @@ class SqliteDB:
                 cursor, self.oracle_package)
             self.__sqlite_oracle_common_table_create(
                 cursor, self.oracle_sequence)
+            self.__sqlite_oracle_common_table_create(
+                cursor, self.oracle_type)
 
     def sqlite_table_insert(self, data, tag):
         """ create oracle table """

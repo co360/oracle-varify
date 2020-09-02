@@ -100,6 +100,13 @@ class OracleDB:
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
+    def get_user_types(self, user):
+        """ get user type """
+        sql = self.get_sql_from_ini('get_user_type_status')
+        sql = sql.format(owner=user)
+        result = [list(item) for item in self.cursor.execute(sql)]
+        return result
+
     def get_user_sequences(self, user):
         """ get user sequences """
         sql = self.get_sql_from_ini('get_user_sequence_status')
@@ -220,6 +227,8 @@ class OracleDB:
             result = self.get_user_packages(user)
         elif object_name == 'sequence':
             result = self.get_user_sequences(user)
+        elif object_name == 'type':
+            result = self.get_user_types(user)
         else:
             logging.error(f'Target object {object_name} is error')
             return False

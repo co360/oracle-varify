@@ -66,9 +66,9 @@ def collect_oracle_data(sqlite_db, config, users, tag):
         # collect_oracle_common_object(oracle_db, sqlite_db, 'synonym', user, tag)
         # collect_oracle_common_object(oracle_db, sqlite_db, 'materialized_view', user, tag)
         # collect_oracle_common_object(
-            # oracle_db, sqlite_db, 'trigger', user, tag)
+        # oracle_db, sqlite_db, 'trigger', user, tag)
         # collect_oracle_common_object(
-            # oracle_db, sqlite_db, 'dblink', user, tag)
+        # oracle_db, sqlite_db, 'dblink', user, tag)
         # collect_oracle_common_object(
         #     oracle_db, sqlite_db, 'function', user, tag)
         # collect_oracle_common_object(
@@ -79,8 +79,11 @@ def collect_oracle_data(sqlite_db, config, users, tag):
         #     oracle_db, sqlite_db, 'table_partition', user, tag)
         # collect_oracle_common_object(
         #     oracle_db, sqlite_db, 'package', user, tag)
+        # collect_oracle_common_object(
+        #     oracle_db, sqlite_db, 'sequence', user, tag)
         collect_oracle_common_object(
-            oracle_db, sqlite_db, 'sequence', user, tag)
+            oracle_db, sqlite_db, 'type', user, tag)
+
 
 def sqlite_db_reset(sqlite_db):
     """ delete sqlite all tables """
@@ -90,19 +93,19 @@ def sqlite_db_reset(sqlite_db):
 
 def collect_oracle_init():
     """ start to collect oracle init """
-    source_oracle_config=get_data_from_oracle_config('source')
-    dest_oracle_config=get_data_from_oracle_config('dest')
-    dvt_config=get_data_from_oracle_config('dvt')
-    target_users=dvt_config['verify_schema']
+    source_oracle_config = get_data_from_oracle_config('source')
+    dest_oracle_config = get_data_from_oracle_config('dest')
+    dvt_config = get_data_from_oracle_config('dvt')
+    target_users = dvt_config['verify_schema']
 
     if not target_users:
         logging.error(
             'verify_schema is empty, please input verify_schema for config.ini')
         return False
 
-    users=target_users.split(',')
+    users = target_users.split(',')
 
-    sqlite_db=SqliteDB()
+    sqlite_db = SqliteDB()
     sqlite_db_reset(sqlite_db)
 
     collect_oracle_data(sqlite_db, source_oracle_config, users, 'source')
