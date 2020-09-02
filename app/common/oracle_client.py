@@ -100,6 +100,13 @@ class OracleDB:
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
+    def get_user_functions(self, user):
+        """ get user functions """
+        sql = self.get_sql_from_ini('get_user_function_status')
+        sql = sql.format(owner=user)
+        result = [list(item) for item in self.cursor.execute(sql)]
+        return result
+
     def get_user_dblinks(self, user):
         """ get user dblinks """
         sql = self.get_sql_from_ini('get_user_dblink')
@@ -166,6 +173,8 @@ class OracleDB:
             result = self.get_user_triggers(user)
         elif object_name == 'dblink':
             result = self.get_user_dblinks(user)
+        elif object_name == 'function':
+            result = self.get_user_functions(user)
         else:
             logging.error(f'Target object {object_name} is error')
             return False
