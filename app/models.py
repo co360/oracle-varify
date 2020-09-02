@@ -5,43 +5,56 @@ import logging
 
 class SqliteDB:
     def __init__(self):
-        self.__init_db()
+        self.__config_init()
 
-    def __init_db(self):
-        cur_dir = os.path.dirname(os.path.abspath('__file__'))
+    def __config_init(self):
         model_path = 'app/oracle.db'
-        db_path = os.path.join(cur_dir, model_path)
-        logging.info(f'model path is {db_path}')
+        cur_dir = os.path.dirname(os.path.abspath('__file__'))
+        self.db = os.path.join(cur_dir, model_path)
+        self.oracle_table = 'oracle_tables'
 
-        try:
-            self.db = sqlite3.connect(db_path)
-            self.cursor = self.db.cursor()
-        except expression as identifier:
-            logging.error(f'connect sqlite error {identifier}')
-            return False
+    def __sqlite_drop_table(self, cursor, table):
+        """ drop target table from sqlite """
+        check_table = f"select count(*) from sqlite_master where type='table' and name='{table}'"
+        table_status = cursor.execute(check_table)
+        if table_status:
+            logging.warn(f'table {table} is exist, drop it')
+            cursor.execute(f'drop table {table}')
 
-    def check_table_exist(self, table):
-        cursot_data = self.cursor.execute(
-            f"select count(*) from sqlite_master where type='table' and name='{table}'")
-        count = [item[0] for item in cursot_data][0]
+    def oracle_drop_tables(self):
+        """ drop all sqlite tables """
+        with sqlite3.connect(self.db) as connection:
+            cursor = connection.cursor()
+            self.__sqlite_drop_table(cursor, self.oracle_table)
 
-        return True if count else False
+    def __sqlite_oracle_table_create(self, cursor):
+        """ create target table from sqlite """
+        cursor.execute(f'''
+                CREATE TABLE {self.oracle_table}(
+                    p_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name CHAR(100) NOT NULL,      
+                    owner CHAR(100) NOT NULL,
+                    tag CHAR(10) NOT NULL,
+                    status CHAR(20) NOT NULL,
+                    num_rows CHAR(100) NOT NULL)'''
+                       )
 
-    def create_table_table(self):
-        oracle_table = 'oracle_tables'
-        status = self.check_table_exist(oracle_table)
-        if status:
-            self.cursor.execute(f'drop table {oracle_table}')
-        self.cursor.execute(f'''
-            CREATE TABLE {oracle_table}(
-                id INT PRIMARY KEY NOT NULL,           
-                name CHAR(100) NOT NULL,          
-                owner CHAR(100) NOT NULL,            
-                status CHAR(20) NOT NULL,            
-                num_rows CHAR(100) NOT NULL)'''
-                            )
-        self.db.commit()
+    def oracle_tables_create(self):
+        """ create all sqlite tables """
+        with sqlite3.connect(self.db) as connection:
+            cursor = connection.cursor()
+            self.__sqlite_oracle_table_create(cursor)
 
-    def close_connect(self):
-        self.cursor.close()
-        self.db.close()
+    def sqlite_table_insert(self, data, tag):
+        """ create oracle table """
+        with sqlite3.connect(self.db) as connection:
+            cursor = connection.cursor()
+            for row_line in data:
+                name = row_line[1]
+                owner = row_line[0]
+                tag = tag
+                status = row_line[2]
+                num_rows = row_line[3]
+                sql = f'INSERT INTO oracle_tables VALUES (NULL,"{name}", "{owner}", "{tag}", "{status}", "{num_rows}")'
+                logging.info(f'insert into table sql is {sql}')
+                cursor.execute(sql)

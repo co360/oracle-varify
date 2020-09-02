@@ -33,23 +33,37 @@ def get_data_from_oracle_config(type):
         return False
 
 
-def collect_oracle_data(config, users):
+def collect_oracle_tables(oracle_db, sqlite_db, user, tag):
+    """ collect oracle tables data """
+    user_tables = oracle_db.get_user_tables_data(user)
+    sqlite_db.sqlite_table_insert(user_tables, tag)
+    logging.info(f'{user} table is {user_tables}')
+
+
+def collect_oracle_data(sqlite_db, config, users, tag):
+    """ collect oracle data and insert data to sqlite """
     oracle_db = OracleDB(config)
     status = oracle_db.connect_oracle()
     logging.info(f'status {status}')
-    sqlite_db = SqliteDB()
-    sqlite_db.create_table_table()
+
     if not status:
         logging.error(f'Connect oracle error, {config}')
         return False
+
     oracle_db.env_init()
 
     for user in users:
-        user_tables = oracle_db.get_user_tables_data(user)
-        logging.info(f'{user} table is {user_tables}')
+        collect_oracle_tables(oracle_db, sqlite_db, user, tag)
+
+
+def sqlite_db_reset(sqlite_db):
+    """ delete sqlite all tables """
+    sqlite_db.oracle_drop_tables()
+    sqlite_db.oracle_tables_create()
 
 
 def collect_oracle_init():
+    """ start to collect oracle init """
     source_oracle_config = get_data_from_oracle_config('source')
     dest_oracle_config = get_data_from_oracle_config('dest')
     dvt_config = get_data_from_oracle_config('dvt')
@@ -61,5 +75,9 @@ def collect_oracle_init():
         return False
 
     users = target_users.split(',')
-    source_oracle_objects = collect_oracle_data(source_oracle_config, users)
-    # dest_oracle_objects = collect_oracle_data(dest_oracle_config, users)
+
+    sqlite_db = SqliteDB()
+    sqlite_db_reset(sqlite_db)
+
+    collect_oracle_data(sqlite_db, source_oracle_config, users, 'source')
+    collect_oracle_data(sqlite_db, dest_oracle_config, users, 'dest')

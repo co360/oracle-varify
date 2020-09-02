@@ -17,7 +17,6 @@ from configparser import ConfigParser
 import os
 
 
-
 class OracleDB:
     def __init__(self, data):
         self.data = data
@@ -87,59 +86,65 @@ class OracleDB:
             result.append(table_line)
         return result
 
-    def get_all_users(self):
-        sql = self.get_sql_from_ini('get_all_users')
-        return {item[0] for item in self.cursor.execute(sql)}
-
     def get_user_views(self, user):
         sql = self.get_sql_from_ini('get_user_views')
         sql = sql.format(owner=user)
-        return {item[0] for item in self.cursor.execute(sql)}
+        result = {item[0] for item in self.cursor.execute(sql)}
+        return result
 
     def get_user_functions(self, user):
         sql = self.get_sql_from_ini('get_user_functions')
         sql = sql.format(owner=user)
-        return {item[0] for item in self.cursor.execute(sql)}
+        result = {item[0] for item in self.cursor.execute(sql)}
+        return result
 
     def get_user_procedures(self, user):
         sql = self.get_sql_from_ini('get_user_procedures')
         sql = sql.format(owner=user)
-        return {item[0] for item in self.cursor.execute(sql)}
+        result = {item[0] for item in self.cursor.execute(sql)}
+        return result
 
     def get_user_sequences(self, user):
         sql = self.get_sql_from_ini('get_user_sequences')
         sql = sql.format(owner=user)
-        return {item[0] for item in self.cursor.execute(sql)}
+        result = {item[0] for item in self.cursor.execute(sql)}
+        return result
 
     def get_user_triggers(self, user):
         sql = self.get_sql_from_ini('get_user_triggers')
         sql = sql.format(owner=user)
-        return {item[0] for item in self.cursor.execute(sql)}
+        result = {item[0] for item in self.cursor.execute(sql)}
+        return result
 
     def get_user_packages(self, user):
         sql = self.get_sql_from_ini('get_user_packages')
         sql = sql.format(owner=user)
-        return {item[0] for item in self.cursor.execute(sql)}
+        result = {item[0] for item in self.cursor.execute(sql)}
+        return result
 
     def get_user_materialized_views(self, user):
         sql = self.get_sql_from_ini('get_user_materialized_views')
         sql = sql.format(owner=user)
-        return {item[0] for item in self.cursor.execute(sql)}
+        result = {item[0] for item in self.cursor.execute(sql)}
+        return result
 
     def get_user_types(self, user):
         sql = self.get_sql_from_ini('get_user_types')
         sql = sql.format(owner=user)
-        return {item[0] for item in self.cursor.execute(sql)}
+        result = {item[0] for item in self.cursor.execute(sql)}
+        return result
 
     def get_user_synonyms(self, user):
         sql = self.get_sql_from_ini('get_user_synonyms')
         sql = sql.format(owner=user)
-        return {item[0] for item in self.cursor.execute(sql)}
+        result = {item[0] for item in self.cursor.execute(sql)}
+        return result
 
     def get_oracle_version(self):
         sql = self.get_sql_from_ini('get_oracle_version')
         basicInfo = [item for item in self.cursor.execute(sql)][1]
-        return '-'.join(basicInfo)
+        result = '-'.join(basicInfo)
+        return result
 
     def get_database_name(self):
         sql = self.get_sql_from_ini('get_database_name')
@@ -149,12 +154,14 @@ class OracleDB:
     def get_storage_type(self):
         sql = self.get_sql_from_ini('get_storage_type')
         storage_type = [item for item in self.cursor.execute(sql)][0]
-        return '-'.join(storage_type)
+        result = '-'.join(storage_type)
+        return result
 
     def get_charcode(self):
         sql = self.get_sql_from_ini('get_charcode')
         charcode = [item for item in self.cursor.execute(sql)][0]
-        return '-'.join(charcode)
+        result = '-'.join(charcode)
+        return result
 
     def get_table_size(self, table_name):
         sql = self.get_sql_from_ini('get_table_size')
@@ -165,8 +172,8 @@ class OracleDB:
             size = result[0][1]
         else:
             size = 0
-
         return size
 
     def close(self):
+        """ close connect oracle """
         self.db.close()
