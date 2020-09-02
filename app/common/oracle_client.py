@@ -100,29 +100,18 @@ class OracleDB:
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
+    def get_user_materialized_views(self, user):
+        """ get user materialized_view """
+        sql = self.get_sql_from_ini('get_user_materialized_view')
+        sql = sql.format(owner=user)
+        result = [list(item) for item in self.cursor.execute(sql)]
+        return result
+
     def get_user_synonyms(self, user):
         """ get user synonyms """
         sql = self.get_sql_from_ini('get_user_synonym_status')
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
-        return result
-
-    def get_user_functions(self, user):
-        sql = self.get_sql_from_ini('get_user_functions')
-        sql = sql.format(owner=user)
-        result = {item[0] for item in self.cursor.execute(sql)}
-        return result
-
-    def get_user_procedures(self, user):
-        sql = self.get_sql_from_ini('get_user_procedures')
-        sql = sql.format(owner=user)
-        result = {item[0] for item in self.cursor.execute(sql)}
-        return result
-
-    def get_user_sequences(self, user):
-        sql = self.get_sql_from_ini('get_user_sequences')
-        sql = sql.format(owner=user)
-        result = {item[0] for item in self.cursor.execute(sql)}
         return result
 
     def get_user_triggers(self, user):
@@ -133,18 +122,6 @@ class OracleDB:
 
     def get_user_packages(self, user):
         sql = self.get_sql_from_ini('get_user_packages')
-        sql = sql.format(owner=user)
-        result = {item[0] for item in self.cursor.execute(sql)}
-        return result
-
-    def get_user_materialized_views(self, user):
-        sql = self.get_sql_from_ini('get_user_materialized_views')
-        sql = sql.format(owner=user)
-        result = {item[0] for item in self.cursor.execute(sql)}
-        return result
-
-    def get_user_types(self, user):
-        sql = self.get_sql_from_ini('get_user_types')
         sql = sql.format(owner=user)
         result = {item[0] for item in self.cursor.execute(sql)}
         return result
@@ -172,17 +149,6 @@ class OracleDB:
         result = '-'.join(charcode)
         return result
 
-    def get_table_size(self, table_name):
-        sql = self.get_sql_from_ini('get_table_size')
-        sql = sql.format(table=table_name)
-        self.cursor.execute(sql)
-        result = self.cursor.fetchall()
-        if result:
-            size = result[0][1]
-        else:
-            size = 0
-        return size
-
     def get_user_objects(self, user, object_name):
         """ get common result objects """
         result = None
@@ -191,7 +157,9 @@ class OracleDB:
         elif object_name == 'job':
             result = self.get_user_jobs(user)
         elif object_name == 'synonym':
-            pass
+            result = self.get_user_synonyms(user)
+        elif object_name == 'materialized_view':
+            result = self.get_user_materialized_views(user)
         else:
             logging.error(f'Target object {object_name} is error')
             return False
