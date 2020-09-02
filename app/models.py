@@ -14,6 +14,7 @@ class SqliteDB:
         self.oracle_table = 'oracle_tables'
         self.oracle_view = 'oracle_views'
         self.oracle_job = 'oracle_jobs'
+        self.oracle_synonym = 'oracle_synonyms'
 
     def __sqlite_drop_table(self, cursor, table):
         """ drop target table from sqlite """
@@ -32,6 +33,7 @@ class SqliteDB:
             self.__sqlite_drop_table(cursor, self.oracle_table)
             self.__sqlite_drop_table(cursor, self.oracle_view)
             self.__sqlite_drop_table(cursor, self.oracle_job)
+            self.__sqlite_drop_table(cursor, self.oracle_synonym)
 
     def __sqlite_oracle_table_create(self, cursor):
         """ create target table to sqlite """
@@ -65,6 +67,8 @@ class SqliteDB:
             result = self.oracle_view
         elif table_name == 'job':
             result = self.oracle_job
+        elif table_name == 'synonym':
+            result = self.oracle_synonym
         
         if not result:
             logging.error(f'Target table name {table_name} is not exist')
@@ -95,6 +99,7 @@ class SqliteDB:
             self.__sqlite_oracle_table_create(cursor)
             self.__sqlite_oracle_common_table_create(cursor, self.oracle_view)
             self.__sqlite_oracle_common_table_create(cursor, self.oracle_job)
+            self.__sqlite_oracle_common_table_create(cursor, self.oracle_synonym)
 
     def sqlite_table_insert(self, data, tag):
         """ create oracle table """

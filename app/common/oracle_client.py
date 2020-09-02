@@ -100,6 +100,13 @@ class OracleDB:
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
+    def get_user_synonyms(self, user):
+        """ get user synonyms """
+        sql = self.get_sql_from_ini('get_user_synonym_status')
+        sql = sql.format(owner=user)
+        result = [list(item) for item in self.cursor.execute(sql)]
+        return result
+
     def get_user_functions(self, user):
         sql = self.get_sql_from_ini('get_user_functions')
         sql = sql.format(owner=user)
@@ -142,12 +149,6 @@ class OracleDB:
         result = {item[0] for item in self.cursor.execute(sql)}
         return result
 
-    def get_user_synonyms(self, user):
-        sql = self.get_sql_from_ini('get_user_synonyms')
-        sql = sql.format(owner=user)
-        result = {item[0] for item in self.cursor.execute(sql)}
-        return result
-
     def get_oracle_version(self):
         sql = self.get_sql_from_ini('get_oracle_version')
         basicInfo = [item for item in self.cursor.execute(sql)][1]
@@ -181,7 +182,7 @@ class OracleDB:
         else:
             size = 0
         return size
-    
+
     def get_user_objects(self, user, object_name):
         """ get common result objects """
         result = None
@@ -189,6 +190,8 @@ class OracleDB:
             result = self.get_user_views(user)
         elif object_name == 'job':
             result = self.get_user_jobs(user)
+        elif object_name == 'synonym':
+            pass
         else:
             logging.error(f'Target object {object_name} is error')
             return False
