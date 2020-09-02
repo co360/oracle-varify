@@ -87,9 +87,9 @@ class OracleDB:
         return result
 
     def get_user_views(self, user):
-        sql = self.get_sql_from_ini('get_user_views')
+        sql = self.get_sql_from_ini('get_user_view_status')
         sql = sql.format(owner=user)
-        result = {item[0] for item in self.cursor.execute(sql)}
+        result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
     def get_user_functions(self, user):
@@ -173,6 +173,17 @@ class OracleDB:
         else:
             size = 0
         return size
+    
+    def get_user_objects(self, user, object_name):
+        """ get common result objects """
+        result = None
+        if object_name == 'view':
+            result = self.get_user_views(user)
+        
+        if not result:
+            logging.error(f'Target object {object_name} is error')
+            return False
+        return result
 
     def close(self):
         """ close connect oracle """
