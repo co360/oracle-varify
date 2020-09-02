@@ -36,13 +36,14 @@ def collect_oracle_data(config, users):
     oracle_db = OracleDB(config)
     status = oracle_db.connect_oracle()
     logging.info(f'status {status}')
-    if status:
-        oracle_db.env_init()
-    else:
+    if not status:
         logging.error(f'Connect oracle error, {config}')
         return False
+    oracle_db.env_init()
 
-    logging.info(f'{users}')
+    for user in users:
+        user_tables = oracle_db.get_user_tables(user)
+        logging.info(f'{user} table is {user_tables}')
 
 
 def collect_oracle_init():
@@ -59,4 +60,3 @@ def collect_oracle_init():
     users = target_users.split(',')
     source_oracle_objects = collect_oracle_data(source_oracle_config, users)
     dest_oracle_objects = collect_oracle_data(dest_oracle_config, users)
-    

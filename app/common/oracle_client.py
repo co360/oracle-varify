@@ -16,6 +16,7 @@ import time
 from configparser import ConfigParser
 import os
 
+
 class OracleDB:
     def __init__(self, data):
         self.data = data
@@ -26,11 +27,11 @@ class OracleDB:
         logging.info(self.data['user'])
         try:
             self.db = cx_Oracle.connect(
-            self.data['user'],
-            self.data['password'],
-            f"{self.data['host']}:{self.data['port']}/{self.data['sid']}",
-            mode=cx_Oracle.DEFAULT_AUTH,
-            encoding="UTF-8")
+                self.data['user'],
+                self.data['password'],
+                f"{self.data['host']}:{self.data['port']}/{self.data['sid']}",
+                mode=cx_Oracle.DEFAULT_AUTH,
+                encoding="UTF-8")
         except:
             logging.error('userInfo error {}'.format(str(self.data)))
             return False
@@ -46,7 +47,6 @@ class OracleDB:
     def get_sql_from_ini(self, key):
         config = ConfigParser()
         cur_dir = os.path.dirname(os.path.abspath('__file__'))
-        logging.info(f'===== curdir {cur_dir}')
         config_path = os.path.join(cur_dir, 'app/common/oracle_sql.ini')
         if not os.path.exists(config_path):
             logging.error(f'{config_path} is not exist, please check')
@@ -63,96 +63,80 @@ class OracleDB:
     def get_user_tables(self, user):
         sql = self.get_sql_from_ini('get_user_tables')
         sql = sql.format(OWNER=user)
-        return [ item for item in self.cursor.execute(sql) ]
+        logging.info(f'====== table sql is {sql}')
+        return [item for item in self.cursor.execute(sql)]
 
     def get_all_users(self):
         sql = self.get_sql_from_ini('get_all_users')
-        return { item[0] for item in self.cursor.execute(sql) }
+        return {item[0] for item in self.cursor.execute(sql)}
 
     def get_user_views(self, user):
-        sql = self.get_sql_from_ini('getUserViews')
+        sql = self.get_sql_from_ini('get_user_views')
         sql = sql.format(owner=user)
-        return { item[0] for item in self.cursor.execute(sql) }
-
-    def get_view_text(self, user, view_name):
-        sql = self.get_sql_from_ini('getViewText')
-        sql = sql.format(owner=user, view_name=view_name)
-        return [ item[0] for item in self.cursor.execute(sql) ][0]
+        return {item[0] for item in self.cursor.execute(sql)}
 
     def get_user_functions(self, user):
-        sql = self.get_sql_from_ini('getUserFunctions')
+        sql = self.get_sql_from_ini('get_user_functions')
         sql = sql.format(owner=user)
-        return { item[0] for item in self.cursor.execute(sql) }
-
-    def get_function_text(self, user, function_name):
-        sql = self.get_sql_from_ini('getFunctionText')
-        sql = sql.format(owner=user, function_name=function_name)
-        result = [ item[0] for item in self.cursor.execute(sql) ]
-        return '\n'.join(result)
+        return {item[0] for item in self.cursor.execute(sql)}
 
     def get_user_procedures(self, user):
-        sql = self.get_sql_from_ini('getUserProcedures')
+        sql = self.get_sql_from_ini('get_user_procedures')
         sql = sql.format(owner=user)
-        return { item[0] for item in self.cursor.execute(sql) }
-
-    def get_procedure_text(self, user, procedure_name):
-        sql = self.get_sql_from_ini('getProcedureText')
-        sql = sql.format(owner=user, procedure_name=procedure_name)
-        result = [ item[0] for item in self.cursor.execute(sql) ]
-        return '\n'.join(result)
+        return {item[0] for item in self.cursor.execute(sql)}
 
     def get_user_sequences(self, user):
-        sql = self.get_sql_from_ini('getUserSequences')
+        sql = self.get_sql_from_ini('get_user_sequences')
         sql = sql.format(owner=user)
-        return { item[0] for item in self.cursor.execute(sql) }
+        return {item[0] for item in self.cursor.execute(sql)}
 
     def get_user_triggers(self, user):
-        sql = self.get_sql_from_ini('getUserTriggers')
+        sql = self.get_sql_from_ini('get_user_triggers')
         sql = sql.format(owner=user)
-        return { item[0] for item in self.cursor.execute(sql) }
+        return {item[0] for item in self.cursor.execute(sql)}
 
     def get_user_packages(self, user):
-        sql = self.get_sql_from_ini('getUserPackages')
+        sql = self.get_sql_from_ini('get_user_packages')
         sql = sql.format(owner=user)
-        return { item[0] for item in self.cursor.execute(sql) }
+        return {item[0] for item in self.cursor.execute(sql)}
 
     def get_user_materialized_views(self, user):
-        sql = self.get_sql_from_ini('getUserMaterializedViews')
+        sql = self.get_sql_from_ini('get_user_materialized_views')
         sql = sql.format(owner=user)
-        return { item[0] for item in self.cursor.execute(sql) }
+        return {item[0] for item in self.cursor.execute(sql)}
 
     def get_user_types(self, user):
-        sql = self.get_sql_from_ini('getUserTypes')
+        sql = self.get_sql_from_ini('get_user_types')
         sql = sql.format(owner=user)
-        return { item[0] for item in self.cursor.execute(sql) }
+        return {item[0] for item in self.cursor.execute(sql)}
 
     def get_user_synonyms(self, user):
-        sql = self.get_sql_from_ini('getUserSynonyms')
+        sql = self.get_sql_from_ini('get_user_synonyms')
         sql = sql.format(owner=user)
-        return { item[0] for item in self.cursor.execute(sql) }
+        return {item[0] for item in self.cursor.execute(sql)}
 
     def get_oracle_version(self):
-        sql = self.get_sql_from_ini('getOracleVersion')
-        basicInfo = [ item for item in self.cursor.execute(sql) ][1]
+        sql = self.get_sql_from_ini('get_oracle_version')
+        basicInfo = [item for item in self.cursor.execute(sql)][1]
         return '-'.join(basicInfo)
 
     def get_database_name(self):
-        sql = self.get_sql_from_ini('getDatabaseName')
-        database_name = [ item[0] for item in self.cursor.execute(sql)][0]
+        sql = self.get_sql_from_ini('get_database_name')
+        database_name = [item[0] for item in self.cursor.execute(sql)][0]
         return database_name
 
     def get_storage_type(self):
-        sql = self.get_sql_from_ini('getStorageType')
-        storage_type = [ item for item in self.cursor.execute(sql)][0]
+        sql = self.get_sql_from_ini('get_storage_type')
+        storage_type = [item for item in self.cursor.execute(sql)][0]
         return '-'.join(storage_type)
 
     def get_charcode(self):
-        sql = self.get_sql_from_ini('getCharCode')
-        charcode = [ item for item in self.cursor.execute(sql)][0]
+        sql = self.get_sql_from_ini('get_charcode')
+        charcode = [item for item in self.cursor.execute(sql)][0]
         return '-'.join(charcode)
 
     def get_table_size(self, table_name):
-        sql = self.get_sql_from_ini('getTableSize')
+        sql = self.get_sql_from_ini('get_table_size')
         sql = sql.format(table=table_name)
         self.cursor.execute(sql)
         result = self.cursor.fetchall()
