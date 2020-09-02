@@ -1,7 +1,7 @@
 import sqlite3
 import os
 import logging
-from .common.common import get_data_from_ini_file
+from .common.common import get_all_data_from_ini_file
 
 
 class SqliteDB:
@@ -14,37 +14,23 @@ class SqliteDB:
         ini_container = 'oracle_table_name'
         cur_dir = os.path.dirname(os.path.abspath('__file__'))
         self.db = os.path.join(cur_dir, model_path)
+        oracle_table_name = get_all_data_from_ini_file(ini_path, ini_container)
 
-        self.oracle_table = get_data_from_ini_file(
-            ini_path, ini_container, 'oracle_table')
-        self.oracle_view = get_data_from_ini_file(
-            ini_path, ini_container, 'oracle_view')
-        self.oracle_job = get_data_from_ini_file(
-            ini_path, ini_container, 'oracle_job')
-        self.oracle_synonym = get_data_from_ini_file(
-            ini_path, ini_container, 'oracle_synonym')
-        self.oracle_materialized_view = get_data_from_ini_file(
-            ini_path, ini_container, 'oracle_materialized_view')
-        self.oracle_trigger = get_data_from_ini_file(
-            ini_path, ini_container, 'oracle_trigger')
-        self.oracle_dblink = get_data_from_ini_file(
-            ini_path, ini_container, 'oracle_dblink')
-        self.oracle_function = get_data_from_ini_file(
-            ini_path, ini_container, 'oracle_function')
-        self.oracle_procedure = get_data_from_ini_file(
-            ini_path, ini_container, 'oracle_procedure')
-        self.oracle_index = get_data_from_ini_file(
-            ini_path, ini_container, 'oracle_index')
-        self.oracle_table_partition = get_data_from_ini_file(
-            ini_path, ini_container, 'oracle_table_partition')
-        self.oracle_package = get_data_from_ini_file(
-            ini_path, ini_container, 'oracle_package')
-        self.oracle_sequence = get_data_from_ini_file(
-            ini_path, ini_container, 'oracle_sequence')
-        self.oracle_type = get_data_from_ini_file(
-            ini_path, ini_container, 'oracle_type')
-        self.oracle_statistic = get_data_from_ini_file(
-            ini_path, ini_container, 'oracle_statistic')
+        self.oracle_table = oracle_table_name['oracle_table']
+        self.oracle_view = oracle_table_name['oracle_view']
+        self.oracle_job = oracle_table_name['oracle_job']
+        self.oracle_synonym = oracle_table_name['oracle_synonym']
+        self.oracle_materialized_view = oracle_table_name['oracle_materialized_view']
+        self.oracle_trigger = oracle_table_name['oracle_trigger']
+        self.oracle_dblink = oracle_table_name['oracle_dblink']
+        self.oracle_function = oracle_table_name['oracle_function']
+        self.oracle_procedure = oracle_table_name['oracle_procedure']
+        self.oracle_index = oracle_table_name['oracle_index']
+        self.oracle_table_partition = oracle_table_name['oracle_table_partition']
+        self.oracle_package = oracle_table_name['oracle_package']
+        self.oracle_sequence = oracle_table_name['oracle_sequence']
+        self.oracle_type = oracle_table_name['oracle_type']
+        self.oracle_statistic = oracle_table_name['oracle_statistic']
 
     def __sqlite_drop_table(self, cursor, table):
         """ drop target table from sqlite """
