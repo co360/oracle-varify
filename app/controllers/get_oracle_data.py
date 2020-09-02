@@ -13,6 +13,7 @@ import os
 import logging
 from configparser import ConfigParser
 from ..common.oracle_client import OracleDB
+from ..models import SqliteDB
 
 
 def get_data_from_oracle_config(type):
@@ -36,6 +37,8 @@ def collect_oracle_data(config, users):
     oracle_db = OracleDB(config)
     status = oracle_db.connect_oracle()
     logging.info(f'status {status}')
+    sqlite_db = SqliteDB()
+    sqlite_db.create_table_table()
     if not status:
         logging.error(f'Connect oracle error, {config}')
         return False

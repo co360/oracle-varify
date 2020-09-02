@@ -17,6 +17,7 @@ from configparser import ConfigParser
 import os
 
 
+
 class OracleDB:
     def __init__(self, data):
         self.data = data
