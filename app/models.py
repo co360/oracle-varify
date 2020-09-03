@@ -253,19 +253,13 @@ class SqliteDB:
                 sql = f'INSERT INTO {self.oracle_table} VALUES (NULL,"{name}", "{owner}", "{tag}", "{status}", "{num_rows}")'
                 logging.info(f'insert into table sql is {sql}')
                 cursor.execute(sql)
-
-    def sqlite_common_table_query(self, owner, table_name, tag):
-        """ get data from sqlite table data """
+    
+    def sqlite_query_common_object_table(self, table_name, tag):
+        """ return object table data """
+        table_name = self.__get_table_name(table_name)
         with sqlite3.connect(self.db) as connection:
             cursor = connection.cursor()
-            sql = f'select name, status from {table_name} where owner = "{owner}" and tag = "{tag}" ORDER BY name ASC'
+            sql = f'select name, owner, status from {table_name} where tag = "{tag}" ORDER BY name ASC'
             result = cursor.execute(sql)
             return list(result)
 
-    def sqlite_oracle_table_query(self, owner, table_name, tag):
-        """ get data from sqlite table data """
-        with sqlite3.connect(self.db) as connection:
-            cursor = connection.cursor()
-            sql = f'select name, status, num_rows from {table_name} where owner = "{owner}" and tag = "{tag}" ORDER BY name ASC'
-            result = cursor.execute(sql)
-            return list(result)

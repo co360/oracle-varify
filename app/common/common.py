@@ -1,6 +1,7 @@
 from configparser import ConfigParser
 import os
 import logging
+import hashlib
 
 
 def get_data_from_ini_file(file_path, container_name, key):
@@ -48,4 +49,24 @@ def get_all_data_from_ini_file(file_path, container_name):
         return dict(result)
     else:
         logging.error(f'{container_name} is not exist in config.ini')
+        return False
+
+
+def varify_data_use_md5(source, dest):
+    """
+    use md5 verify source and dest equal 
+    source: str
+    dest: str
+    return True/False
+    """
+    md5_source = hashlib.md5()
+    md5_dest = hashlib.md5()
+    md5_source.update(str(source).encode('utf-8'))
+    md5_dest.update(str(dest).encode('utf-8'))
+    verify_souce = md5_source.hexdigest()
+    verify_dest = md5_dest.hexdigest()
+
+    if verify_souce == verify_dest:
+        return True
+    else:
         return False

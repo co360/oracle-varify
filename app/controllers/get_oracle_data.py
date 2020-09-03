@@ -12,6 +12,7 @@
 import os
 import logging
 from configparser import ConfigParser
+from .verify_object_statistic import VerifyObjectStatistic
 from ..common.oracle_client import OracleDB
 from ..common.common import get_all_data_from_ini_file
 from ..models import SqliteDB
@@ -109,8 +110,8 @@ def collect_oracle_init():
 
     users = target_users.split(',')
 
-    sqlite_db = SqliteDB()
-    sqlite_db_reset(sqlite_db)
-
-    collect_oracle_data(sqlite_db, source_oracle_config, users, 'source')
-    collect_oracle_data(sqlite_db, dest_oracle_config, users, 'dest')
+    # sqlite_db = SqliteDB()
+    # sqlite_db_reset(sqlite_db)
+    # collect_oracle_data(sqlite_db, source_oracle_config, users, 'source')
+    # collect_oracle_data(sqlite_db, dest_oracle_config, users, 'dest')
+    VerifyObjectStatistic()
