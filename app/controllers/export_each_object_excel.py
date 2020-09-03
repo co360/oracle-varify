@@ -24,27 +24,28 @@ class ExportEachObjectExcel:
 
     def __excel_file_path_config(self):
         """ get excel path """
+        logging.info('Start export dashborad, please waiting!!!')
         date_str = datetime.datetime.now()
         date_path = date_str.strftime("%Y-%m-%d_%H-%M-%S")
         cur_dir = os.path.dirname(os.path.abspath('__file__'))
-        excel_dir = os.path.join(cur_dir, 'excel', date_path)
+        file_path = os.path.join(cur_dir, 'excel', date_path)
 
-        if os.path.exists(excel_dir):
-            shutil.rmtree(excel_dir)
-        os.makedirs(excel_dir)
+        if os.path.exists(file_path):
+            shutil.rmtree(file_path)
+        os.makedirs(file_path)
         self.file_path = os.path.join(
-            'excel', date_path, 'oracle_objects_statistic.xls')
+            file_path, 'oracle_objects_statistic.xls')
 
     def __excel_save(self):
         """ save excel """
         self.book.save(self.file_path)
+        logging.info(f'bashboard excel export success, scan {self.file_path}')
 
     def __env_info_sheet_create(self):
         """ write env info """
         env_sheet = self.book.create_sheet('环境信息')
         self.__format_table_header(env_sheet, ['名称', '源', '目标', '校验状态'])
         env_data = self.__get_env_info_data()
-        logging.info(f'{env_data}')
         self.__write_env_info_to_excel(env_sheet, env_data)
 
     def __write_env_info_to_excel(self, cur_sheet, data):
@@ -56,6 +57,8 @@ class ExportEachObjectExcel:
                 cur_cell = cur_sheet.cell(cur_row, index)
                 cur_cell.value = item
                 self.__format_normal_cell(cur_cell)
+                if not row[-1]:
+                    self.__format_error_cell(cur_cell)
             cur_row += 1
 
     def __get_env_info_data(self):
@@ -114,6 +117,8 @@ class ExportEachObjectExcel:
                 cur_cell = cur_sheet.cell(cur_row, index)
                 cur_cell.value = item
                 self.__format_normal_cell(cur_cell)
+                if row[-1] == 'False':
+                    self.__format_error_cell(cur_cell)
             cur_row += 1
 
     def __format_table_header(self, cur_sheet, header_data):
@@ -138,7 +143,7 @@ class ExportEachObjectExcel:
         """ format normal cell style """
         cell_font = Font(name=u'微软雅黑', size=11)
         cur_cell.font = cell_font
-    
+
     def __format_error_cell(self, cur_cell):
         """ format normal cell style """
         fill = PatternFill("solid", fgColor="cc3b3b")
@@ -155,6 +160,5 @@ class ExportEachObjectExcel:
                 if index == 2:
                     cur_cell.value = item.upper()
                 if bool(row[-1]):
-                    logging.info(f'{row}')
                     self.__format_error_cell(cur_cell)
             cur_row += 1
