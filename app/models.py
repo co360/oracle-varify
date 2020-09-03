@@ -263,6 +263,14 @@ class SqliteDB:
             sql = f'select name, owner, status from {table_name} where tag = "{tag}" and owner = "{owner}" ORDER BY name ASC'
             result = cursor.execute(sql)
             return list(result)
+    
+    def sqlite_table_object_query(self, tag, owner):
+        """ return table objects data """
+        with sqlite3.connect(self.db) as connection:
+            cursor = connection.cursor()
+            sql = f'select name, owner, status, num_rows from {self.oracle_table} where tag = "{tag}" and owner = "{owner}" ORDER BY name ASC'
+            result = cursor.execute(sql)
+            return list(result)
 
     def sqlite_verify_object_statistic_insert(self, data):
         """ insert object table data """

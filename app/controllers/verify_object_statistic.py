@@ -18,7 +18,7 @@ class VerifyObjectStatistic:
         keys = object_data.keys()
         result = 0
         if len(keys):
-            result = len(keys) 
+            result = len(keys)
         return result
 
     def __compare_object_md5(self, source, dest):
@@ -49,6 +49,24 @@ class VerifyObjectStatistic:
 
         return count
 
+    def __compare_object_table_data(self, user):
+        """ compare table data """
+        source_data = self.sqlite_db.sqlite_table_object_query('source', user)
+        dest_data = self.sqlite_db.sqlite_table_object_query('dest', user)
+        source_count = len(source_data)
+        dest_count = len(dest_data)
+        verify_count = self.__compare_object_md5(source_data, dest_data)
+        self.__insert_verify_object_table(user, 'table', source_count, dest_count, verify_count)
+
+    def __insert_verify_object_table(self, owner, object, count_source, count_dest, count_error):
+        self.sqlite_db.sqlite_verify_object_statistic_insert({
+            'object': object,
+            'count_source': count_source,
+            'count_dest': count_dest,
+            'count_error': count_error,
+            'owner': owner
+        })
+
     def __compare_object_data(self, object_name, user):
         """
         get source and dest data from sqlite
@@ -61,13 +79,7 @@ class VerifyObjectStatistic:
         dest_count = len(dest_data)
         verify_count = self.__compare_object_md5(source_data, dest_data)
         logging.info(f'{source_count}, {dest_count}, {verify_count}')
-        self.sqlite_db.sqlite_verify_object_statistic_insert({
-            'object': object_name,
-            'count_source': source_count,
-            'count_dest': dest_count,
-            'count_error': verify_count,
-            'owner': user
-        })
+        self.__insert_verify_object_table(user, object_name, source_count, dest_count, verify_count)
 
     def __compare_init(self, users):
         """
@@ -87,3 +99,4 @@ class VerifyObjectStatistic:
             self.__compare_object_data('package', user)
             self.__compare_object_data('sequence', user)
             self.__compare_object_data('type', user)
+            self.__compare_object_table_data(user)
