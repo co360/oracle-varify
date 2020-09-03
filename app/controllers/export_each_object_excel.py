@@ -71,6 +71,7 @@ class ExportEachObjectExcel:
                 self.__format_normal_cell(cur_cell)
                 if not row[-1]:
                     self.__format_error_cell(cur_cell)
+                    self.__set_tab_color_error(cur_sheet)
             cur_row += 1
 
         self.__format_cell_size(cur_sheet, cell_width_list)
@@ -130,9 +131,17 @@ class ExportEachObjectExcel:
             object_name)
 
         if not len(object_data):
-            object_sheet.sheet_properties.tabColor = 'FFFF00'
+            self.__set_tab_color_empty(object_sheet)
 
         self.__write_each_object_data_to_excel(object_sheet, object_data)
+
+    def __set_tab_color_empty(self, cur_sheet):
+        """ empty tab color """
+        cur_sheet.sheet_properties.tabColor = 'FFFF00'
+
+    def __set_tab_color_error(self, cur_sheet):
+        """ empty tab color """
+        cur_sheet.sheet_properties.tabColor = 'cc3b3b'
 
     def __write_each_object_data_to_excel(self, cur_sheet, data):
         """ write each object data to first sheet """
@@ -150,6 +159,7 @@ class ExportEachObjectExcel:
                 self.__format_normal_cell(cur_cell)
                 if row[-1] == 'False':
                     self.__format_error_cell(cur_cell)
+                    self.__set_tab_color_error(cur_sheet)
             cur_row += 1
         self.__format_cell_size(cur_sheet, cell_width_list)
 
