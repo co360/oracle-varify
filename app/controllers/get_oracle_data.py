@@ -110,8 +110,8 @@ def collect_oracle_init():
 
     users = target_users.split(',')
 
-    # sqlite_db = SqliteDB()
-    # sqlite_db_reset(sqlite_db)
+    sqlite_db = SqliteDB()
+    sqlite_db_reset(sqlite_db)
     # collect_oracle_data(sqlite_db, source_oracle_config, users, 'source')
     # collect_oracle_data(sqlite_db, dest_oracle_config, users, 'dest')
-    VerifyObjectStatistic()
+    VerifyObjectStatistic(users)
