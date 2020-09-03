@@ -170,7 +170,7 @@ class SqliteDB:
             result = self.oracle_sequence
         elif table_name == 'type':
             result = self.oracle_type
-        elif table_name == 'statictis':
+        elif table_name == 'env_info':
             result = self.oracle_env_info
 
         if not result:
@@ -269,6 +269,14 @@ class SqliteDB:
         with sqlite3.connect(self.db) as connection:
             cursor = connection.cursor()
             sql = f'select name, owner, status, num_rows from {self.oracle_table} where tag = "{tag}" and owner = "{owner}" ORDER BY name ASC'
+            result = cursor.execute(sql)
+            return list(result)
+
+    def sqlite_env_info_object_query(self, tag):
+        """ return oracle env info objects data """
+        with sqlite3.connect(self.db) as connection:
+            cursor = connection.cursor()
+            sql = f'select name, value from {self.oracle_env_info} where tag = "{tag}" ORDER BY name ASC'
             result = cursor.execute(sql)
             return list(result)
 
