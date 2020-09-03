@@ -311,3 +311,11 @@ class SqliteDB:
             sql = f'select owner, object_name, count_source, count_dest, count_error from {self.oracle_verify_object_statistic} ORDER BY owner ASC'
             result = cursor.execute(sql)
             return list(result)
+
+    def sqlite_oracle_verify_each_object_table_query(self, object_name):
+        """ return verify each object table data """
+        with sqlite3.connect(self.db) as connection:
+            cursor = connection.cursor()
+            sql = f'select owner, name_source, name_dest, verify_status from {self.oracle_verify_each_object_data} where object_type = "{object_name}" ORDER BY owner ASC'
+            result = cursor.execute(sql)
+            return list(result)
