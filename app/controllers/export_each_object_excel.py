@@ -48,18 +48,43 @@ class ExportEachObjectExcel:
         env_data = self.__get_env_info_data()
         self.__write_env_info_to_excel(env_sheet, env_data)
 
+    def __get_max_cell_width(self, cell_width_list, index, cell_value):
+        """ get cell value """
+        cell_width = len(str(cell_value))
+        logging.info(f'{cell_width_list}')
+        logging.info(f'{cell_width}')
+        if cell_width_list[index] < cell_width:
+            cell_width_list[index] = cell_width
+
     def __write_env_info_to_excel(self, cur_sheet, data):
         """ write env info data to excel """
         cur_row = cur_row = int(cur_sheet.max_row) + 1
+        cell_width_list = []
 
         for row in data:
+            if not cell_width_list:
+                cell_width_list = [0] * len(row)
+
             for index, item in enumerate(row, start=1):
+                self.__get_max_cell_width(cell_width_list, index-1, item)
+
                 cur_cell = cur_sheet.cell(cur_row, index)
                 cur_cell.value = item
                 self.__format_normal_cell(cur_cell)
                 if not row[-1]:
                     self.__format_error_cell(cur_cell)
             cur_row += 1
+
+        self.__format_cell_size(cur_sheet, cell_width_list)
+
+    def __format_cell_size(self, cur_sheet, cell_width_list):
+        """ format cell size """
+        alpha_list = [chr(x) for x in range(ord('A'), ord('Z') + 1)]
+        for index, num in enumerate(cell_width_list, start=0):
+            cur_cell_name = alpha_list[index]
+            logging.info(f'{cur_cell_name}')
+            cell_width = num + 5 if num > 15 else 20
+            cur_sheet.column_dimensions[cur_cell_name].width = cell_width
 
     def __get_env_info_data(self):
         """ get env info data """
@@ -111,15 +136,21 @@ class ExportEachObjectExcel:
     def __write_each_object_data_to_excel(self, cur_sheet, data):
         """ write each object data to first sheet """
         cur_row = int(cur_sheet.max_row) + 1
+        cell_width_list = []
 
         for row in data:
+            if not cell_width_list:
+                cell_width_list = [0] * len(row)
+
             for index, item in enumerate(row, start=1):
+                self.__get_max_cell_width(cell_width_list, index-1, item)
                 cur_cell = cur_sheet.cell(cur_row, index)
                 cur_cell.value = item
                 self.__format_normal_cell(cur_cell)
                 if row[-1] == 'False':
                     self.__format_error_cell(cur_cell)
             cur_row += 1
+        self.__format_cell_size(cur_sheet, cell_width_list)
 
     def __format_table_header(self, cur_sheet, header_data):
         """ format table header """
@@ -128,6 +159,8 @@ class ExportEachObjectExcel:
             cur_cell = cur_sheet.cell(1, index)
             cur_cell.value = item
             cur_cell.font = tb_font
+            cur_cell.alignment = Alignment(
+                horizontal='center', vertical='center')
 
     def __first_sheet_init(self):
         """ write first sheet """
@@ -143,6 +176,7 @@ class ExportEachObjectExcel:
         """ format normal cell style """
         cell_font = Font(name=u'微软雅黑', size=11)
         cur_cell.font = cell_font
+        cur_cell.alignment = Alignment(horizontal='left', vertical='center')
 
     def __format_error_cell(self, cur_cell):
         """ format normal cell style """
@@ -152,13 +186,21 @@ class ExportEachObjectExcel:
     def __write_objects_statis_data_to_excel(self, cur_sheet, data):
         """ write objects statistic data to first sheet """
         cur_row = int(cur_sheet.max_row) + 1
+        cell_width_list = []
 
         for row in data:
+            if not cell_width_list:
+                cell_width_list = [0] * len(row)
+
             for index, item in enumerate(row, start=1):
                 cur_cell = cur_sheet.cell(cur_row, index)
                 cur_cell.value = item
+                self.__get_max_cell_width(cell_width_list, index-1, item)
+                self.__format_normal_cell(cur_cell)
+                
                 if index == 2:
                     cur_cell.value = item.upper()
                 if bool(row[-1]):
                     self.__format_error_cell(cur_cell)
             cur_row += 1
+        self.__format_cell_size(cur_sheet, cell_width_list)
