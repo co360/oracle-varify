@@ -30,7 +30,10 @@ class SqliteDB:
         self.oracle_package = oracle_table_name['oracle_package']
         self.oracle_sequence = oracle_table_name['oracle_sequence']
         self.oracle_type = oracle_table_name['oracle_type']
-        self.oracle_statistic = oracle_table_name['oracle_statistic']
+        self.oracle_env_info = oracle_table_name['oracle_env_info']
+        self.oracle_verify_object_statistic = oracle_table_name['oracle_verify_object_statistic']
+        self.oracle_verify_each_object_data = oracle_table_name['oracle_verify_each_object_data']
+        self.oracle_verify_table_row = oracle_table_name['oracle_verify_table_row']
 
     def __sqlite_drop_table(self, cursor, table):
         """ drop target table from sqlite """
@@ -60,7 +63,12 @@ class SqliteDB:
             self.__sqlite_drop_table(cursor, self.oracle_package)
             self.__sqlite_drop_table(cursor, self.oracle_sequence)
             self.__sqlite_drop_table(cursor, self.oracle_type)
-            self.__sqlite_drop_table(cursor, self.oracle_statistic)
+            self.__sqlite_drop_table(cursor, self.oracle_env_info)
+            self.__sqlite_drop_table(
+                cursor, self.oracle_verify_object_statistic)
+            self.__sqlite_drop_table(
+                cursor, self.oracle_verify_each_object_data)
+            self.__sqlite_drop_table(cursor, self.oracle_verify_table_row)
 
     def __sqlite_oracle_table_create(self, cursor):
         """ create target table to sqlite """
@@ -85,13 +93,48 @@ class SqliteDB:
                     status CHAR(20) NOT NULL)'''
                        )
 
-    def __sqlite_oracle_statistic_create(self, cursor):
+    def __sqlite_oracle_env_info_create(self, cursor):
         """ create oracle statistic to sqlite """
         cursor.execute(f'''
-                CREATE TABLE {self.oracle_statistic}(
+                CREATE TABLE {self.oracle_env_info}(
                     p_ID INTEGER PRIMARY KEY AUTOINCREMENT,
                     name CHAR(100) NOT NULL,      
                     value CHAR(100) NOT NULL,
+                    tag CHAR(10) NOT NULL)'''
+                       )
+
+    def __sqlite_oracle_verify_object_statistic(self, cursor):
+        """ create oracle statistic to sqlite """
+        cursor.execute(f'''
+                CREATE TABLE {self.oracle_verify_object_statistic}(
+                    p_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    object CHAR(100) NOT NULL,      
+                    count_source INTEGER NOT NULL,
+                    count_dest INTEGER NOT NULL,
+                    count_error INTEGER NOT NULL)'''
+                       )
+
+    def __sqlite_oracle_verify_each_object_data(self, cursor):
+        """ create oracle each object data to sqlite """
+        cursor.execute(f'''
+                CREATE TABLE {self.oracle_verify_each_object_data}(
+                    p_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    owner CHAR(100) NOT NULL,      
+                    name_source CHAR(100) NOT NULL,
+                    name_dest CHAR(100) NOT NULL,
+                    type CHAR(50) NOT NULL,
+                    verify_status INTEGER NOT NULL)'''
+                       )
+
+    def __sqlite_oracle_verify_table_row(self, cursor):
+        """ create oracle table row to sqlite """
+        cursor.execute(f'''
+                CREATE TABLE {self.oracle_verify_table_row}(
+                    p_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    owner CHAR(100) NOT NULL,      
+                    table_name CHAR(100) NOT NULL,
+                    primary_group CHAR(100) NOT NULL,
+                    primary_group_value CHAR(100) NOT NULL,
                     tag CHAR(10) NOT NULL)'''
                        )
 
@@ -127,7 +170,7 @@ class SqliteDB:
         elif table_name == 'type':
             result = self.oracle_type
         elif table_name == 'statictis':
-            result = self.oracle_statistic
+            result = self.oracle_env_info
 
         if not result:
             logging.error(f'Target table name {table_name} is not exist')
@@ -151,15 +194,15 @@ class SqliteDB:
                 logging.info(f'insert into table sql is {sql}')
                 cursor.execute(sql)
 
-    def sqlite_oracle_statistic_insert(self, data, tag):
+    def sqlite_oracle_env_info_insert(self, data, tag):
         """ statistic oracle data """
         if not data:
-            logging.warn(f'Target table {self.oracle_statistic} is empty')
+            logging.warn(f'Target table {self.oracle_env_info} is empty')
             return False
         with sqlite3.connect(self.db) as connection:
             cursor = connection.cursor()
             for key, value in data.items():
-                sql = f'INSERT INTO {self.oracle_statistic} VALUES (NULL, "{key}", "{value}", "{tag}")'
+                sql = f'INSERT INTO {self.oracle_env_info} VALUES (NULL, "{key}", "{value}", "{tag}")'
                 logging.info(f'insert into table sql is {sql}')
                 cursor.execute(sql)
 
@@ -192,7 +235,10 @@ class SqliteDB:
                 cursor, self.oracle_sequence)
             self.__sqlite_oracle_common_table_create(
                 cursor, self.oracle_type)
-            self.__sqlite_oracle_statistic_create(cursor)
+            self.__sqlite_oracle_env_info_create(cursor)
+            self.__sqlite_oracle_verify_object_statistic(cursor)
+            self.__sqlite_oracle_verify_each_object_data(cursor)
+            self.__sqlite_oracle_verify_table_row(cursor)
 
     def sqlite_table_insert(self, data, tag):
         """ create oracle table """
@@ -212,7 +258,7 @@ class SqliteDB:
         """ get data from sqlite table data """
         with sqlite3.connect(self.db) as connection:
             cursor = connection.cursor()
-            sql = f'select name, owner, status from {table_name} where owner = "{owner}" and tag = "{tag}" ORDER BY name ASC'
+            sql = f'select name, status from {table_name} where owner = "{owner}" and tag = "{tag}" ORDER BY name ASC'
             result = cursor.execute(sql)
             return list(result)
 
@@ -220,6 +266,6 @@ class SqliteDB:
         """ get data from sqlite table data """
         with sqlite3.connect(self.db) as connection:
             cursor = connection.cursor()
-            sql = f'select name, owner, status, num_rows from {table_name} where owner = "{owner}" and tag = "{tag}" ORDER BY name ASC'
+            sql = f'select name, status, num_rows from {table_name} where owner = "{owner}" and tag = "{tag}" ORDER BY name ASC'
             result = cursor.execute(sql)
             return list(result)
