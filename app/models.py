@@ -103,7 +103,7 @@ class SqliteDB:
                     tag CHAR(10) NOT NULL)'''
                        )
 
-    def __sqlite_oracle_verify_object_statistic(self, cursor):
+    def __sqlite_oracle_verify_object_statistic_create(self, cursor):
         """ create oracle statistic to sqlite """
         cursor.execute(f'''
                 CREATE TABLE {self.oracle_verify_object_statistic}(
@@ -115,7 +115,7 @@ class SqliteDB:
                     count_error INTEGER NOT NULL)'''
                        )
 
-    def __sqlite_oracle_verify_each_object_data(self, cursor):
+    def __sqlite_oracle_verify_each_object_table_create(self, cursor):
         """ create oracle each object data to sqlite """
         cursor.execute(f'''
                 CREATE TABLE {self.oracle_verify_each_object_data}(
@@ -123,11 +123,11 @@ class SqliteDB:
                     owner CHAR(100) NOT NULL,      
                     name_source CHAR(100) NOT NULL,
                     name_dest CHAR(100) NOT NULL,
-                    type CHAR(50) NOT NULL,
-                    verify_status INTEGER NOT NULL)'''
+                    object_type CHAR(50) NOT NULL,
+                    verify_status CHAR(10) NOT NULL)'''
                        )
 
-    def __sqlite_oracle_verify_table_row(self, cursor):
+    def __sqlite_oracle_verify_table_row_create(self, cursor):
         """ create oracle table row to sqlite """
         cursor.execute(f'''
                 CREATE TABLE {self.oracle_verify_table_row}(
@@ -237,9 +237,9 @@ class SqliteDB:
             # self.__sqlite_oracle_common_table_create(
                 # cursor, self.oracle_type)
             # self.__sqlite_oracle_env_info_create(cursor)
-            self.__sqlite_oracle_verify_object_statistic(cursor)
-            self.__sqlite_oracle_verify_each_object_data(cursor)
-            self.__sqlite_oracle_verify_table_row(cursor)
+            self.__sqlite_oracle_verify_object_statistic_create(cursor)
+            self.__sqlite_oracle_verify_each_object_table_create(cursor)
+            self.__sqlite_oracle_verify_table_row_create(cursor)
 
     def sqlite_table_insert(self, data, tag):
         """ create oracle table """
@@ -289,6 +289,17 @@ class SqliteDB:
             count_dest = data['count_dest']
             count_error = data['count_error']
             owner = data['owner']
-            sql = f'insert into '
             sql = f'INSERT INTO {self.oracle_verify_object_statistic} VALUES (NULL, "{owner}", "{object}", "{count_source}", "{count_dest}", "{count_error}")'
+            cursor.execute(sql)
+
+    def sqlite_verify_each_object_insert(self, data):
+        """ insert object table data """
+        with sqlite3.connect(self.db) as connection:
+            cursor = connection.cursor()
+            owner = data['owner']
+            object_type = data['object_type']
+            name_source = data['name_source']
+            name_dest = data['name_dest']
+            verify_status = data['verify_status']
+            sql = f'INSERT INTO {self.oracle_verify_each_object_data} VALUES (NULL, "{owner}", "{name_source}", "{name_dest}", "{object_type}", "{verify_status}")'
             cursor.execute(sql)
