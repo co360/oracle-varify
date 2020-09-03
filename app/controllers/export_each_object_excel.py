@@ -43,6 +43,19 @@ class ExportEachObjectExcel:
         cur_sheet['C1'] = 'Source Count'
         cur_sheet['D1'] = 'Dest Count'
         cur_sheet['E1'] = 'Verify Error Count'
-        cur_row = int(cur_sheet.max_row) + 1
         objects_data = self.sqlite_db.sqlite_verify_object_statistic_query()
-        logging.info(f'{objects_data}')
+        self.__write_objects_statis_data_to_excel(cur_sheet, objects_data)
+
+    def __write_objects_statis_data_to_excel(self, cur_sheet, data):
+        """ write objects statistic data to first sheet """
+        cur_row = int(cur_sheet.max_row) + 1
+
+        for row in data:
+            cur_sheet.cell(row=cur_row, column=1).value = row[0]
+            cur_sheet.cell(row=cur_row, column=2).value = row[1].upper()
+            cur_sheet.cell(row=cur_row, column=3).value = row[2]
+            cur_sheet.cell(row=cur_row, column=4).value = row[3]
+            cur_sheet.cell(row=cur_row, column=5).value = row[4]
+            cur_row += 1
+            
+
