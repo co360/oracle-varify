@@ -53,7 +53,9 @@ class ExportEachObjectExcel:
 
         for row in data:
             for index, item in enumerate(row, start=1):
-                cur_sheet.cell(cur_row, index).value = item
+                cur_cell = cur_sheet.cell(cur_row, index)
+                cur_cell.value = item
+                self.__format_normal_cell(cur_cell)
             cur_row += 1
 
     def __get_env_info_data(self):
@@ -109,15 +111,18 @@ class ExportEachObjectExcel:
 
         for row in data:
             for index, item in enumerate(row, start=1):
-                cur_sheet.cell(cur_row, index).value = item
+                cur_cell = cur_sheet.cell(cur_row, index)
+                cur_cell.value = item
+                self.__format_normal_cell(cur_cell)
             cur_row += 1
 
     def __format_table_header(self, cur_sheet, header_data):
         """ format table header """
         tb_font = Font(name=u'微软雅黑', bold=True, size=11)
         for index, item in enumerate(header_data, start=1):
-            cur_sheet.cell(1, index).value = item
-            cur_sheet.cell(1, index).font = tb_font
+            cur_cell = cur_sheet.cell(1, index)
+            cur_cell.value = item
+            cur_cell.font = tb_font
 
     def __first_sheet_init(self):
         """ write first sheet """
@@ -129,14 +134,21 @@ class ExportEachObjectExcel:
         objects_data = self.sqlite_db.sqlite_verify_object_statistic_query()
         self.__write_objects_statis_data_to_excel(cur_sheet, objects_data)
 
+    def __format_normal_cell(self, cur_cell):
+        """ format normal cell style """
+        cell_font = Font(name=u'微软雅黑', size=11)
+        cur_cell.font = cell_font
+
     def __write_objects_statis_data_to_excel(self, cur_sheet, data):
         """ write objects statistic data to first sheet """
         cur_row = int(cur_sheet.max_row) + 1
 
         for row in data:
             for index, item in enumerate(row, start=1):
+                cur_cell = cur_sheet.cell(cur_row, index)
                 if index == 2:
-                    cur_sheet.cell(cur_row, index).value = item.upper()
+                    cur_cell.value = item.upper()
                 else:
-                    cur_sheet.cell(cur_row, index).value = item
+                    cur_cell.value = item
+                self.__format_normal_cell(cur_cell)
             cur_row += 1
