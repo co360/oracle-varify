@@ -1,5 +1,7 @@
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
+from openpyxl.styles import PatternFill
+from openpyxl.styles import Font
 import logging
 import os
 import datetime
@@ -40,10 +42,7 @@ class ExportEachObjectExcel:
     def __env_info_sheet_create(self):
         """ write env info """
         env_sheet = self.book.create_sheet('环境信息')
-        env_sheet['A1'] = '名称'
-        env_sheet['B1'] = '源'
-        env_sheet['C1'] = '目标'
-        env_sheet['D1'] = '校验结果'
+        self.__format_table_header(env_sheet, ['名称', '源', '目标', '校验状态'])
         env_data = self.__get_env_info_data()
         logging.info(f'{env_data}')
         self.__write_env_info_to_excel(env_sheet, env_data)
@@ -53,10 +52,8 @@ class ExportEachObjectExcel:
         cur_row = cur_row = int(cur_sheet.max_row) + 1
 
         for row in data:
-            cur_sheet.cell(row=cur_row, column=1).value = row[0]
-            cur_sheet.cell(row=cur_row, column=2).value = row[1]
-            cur_sheet.cell(row=cur_row, column=3).value = row[2]
-            cur_sheet.cell(row=cur_row, column=4).value = row[3]
+            for index, item in enumerate(row, start=1):
+                cur_sheet.cell(cur_row, index).value = item
             cur_row += 1
 
     def __get_env_info_data(self):
@@ -100,10 +97,8 @@ class ExportEachObjectExcel:
     def __common_sheet_create(self, object_name):
         """ create each sheet data to excel """
         object_sheet = self.book.create_sheet(object_name.upper())
-        object_sheet['A1'] = 'Owner'
-        object_sheet['B1'] = 'Source Name'
-        object_sheet['C1'] = 'Dest Name'
-        object_sheet['D1'] = 'Verify Status'
+        self.__format_table_header(
+            object_sheet, ['Schemal', '源名称', '目标名称', '校验状态'])
         object_data = self.sqlite_db.sqlite_oracle_verify_each_object_table_query(
             object_name)
         self.__write_each_object_data_to_excel(object_sheet, object_data)
@@ -113,21 +108,24 @@ class ExportEachObjectExcel:
         cur_row = int(cur_sheet.max_row) + 1
 
         for row in data:
-            cur_sheet.cell(row=cur_row, column=1).value = row[0]
-            cur_sheet.cell(row=cur_row, column=2).value = row[1]
-            cur_sheet.cell(row=cur_row, column=3).value = row[2]
-            cur_sheet.cell(row=cur_row, column=4).value = row[3]
+            for index, item in enumerate(row, start=1):
+                cur_sheet.cell(cur_row, index).value = item
             cur_row += 1
+
+    def __format_table_header(self, cur_sheet, header_data):
+        """ format table header """
+        tb_font = Font(name=u'微软雅黑', bold=True, size=11)
+        for index, item in enumerate(header_data, start=1):
+            cur_sheet.cell(1, index).value = item
+            cur_sheet.cell(1, index).font = tb_font
 
     def __first_sheet_init(self):
         """ write first sheet """
         cur_sheet = self.book.get_sheet_by_name(self.book.sheetnames[0])
-        cur_sheet.title = 'dashboard'
-        cur_sheet['A1'] = 'Owner'
-        cur_sheet['B1'] = 'Objects'
-        cur_sheet['C1'] = 'Source Count'
-        cur_sheet['D1'] = 'Dest Count'
-        cur_sheet['E1'] = 'Verify Error Count'
+        cur_sheet.title = '概览'
+        self.__format_table_header(
+            cur_sheet, ['Schemal', 'Objects', '源总数', '目标总数', '校验状态'])
+
         objects_data = self.sqlite_db.sqlite_verify_object_statistic_query()
         self.__write_objects_statis_data_to_excel(cur_sheet, objects_data)
 
@@ -136,9 +134,9 @@ class ExportEachObjectExcel:
         cur_row = int(cur_sheet.max_row) + 1
 
         for row in data:
-            cur_sheet.cell(row=cur_row, column=1).value = row[0]
-            cur_sheet.cell(row=cur_row, column=2).value = row[1].upper()
-            cur_sheet.cell(row=cur_row, column=3).value = row[2]
-            cur_sheet.cell(row=cur_row, column=4).value = row[3]
-            cur_sheet.cell(row=cur_row, column=5).value = row[4]
+            for index, item in enumerate(row, start=1):
+                if index == 2:
+                    cur_sheet.cell(cur_row, index).value = item.upper()
+                else:
+                    cur_sheet.cell(cur_row, index).value = item
             cur_row += 1
