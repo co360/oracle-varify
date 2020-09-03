@@ -5,6 +5,8 @@ import os
 import datetime
 import shutil
 from ..models import SqliteDB
+from ..common.common import varify_data_use_md5
+
 
 class ExportEachObjectExcel:
     """
@@ -17,7 +19,7 @@ class ExportEachObjectExcel:
         self.__excel_file_path_config()
         self.__each_object_sheet_init()
         self.__excel_save()
-    
+
     def __excel_file_path_config(self):
         """ get excel path """
         date_str = datetime.datetime.now()
@@ -28,16 +30,58 @@ class ExportEachObjectExcel:
         if os.path.exists(excel_dir):
             shutil.rmtree(excel_dir)
         os.makedirs(excel_dir)
-        self.file_path = os.path.join('excel', date_path, 'oracle_objects_statistic.xls')
-    
+        self.file_path = os.path.join(
+            'excel', date_path, 'oracle_objects_statistic.xls')
+
     def __excel_save(self):
         """ save excel """
         self.book.save(self.file_path)
-    
+
+    def __env_info_sheet_create(self):
+        """ write env info """
+        env_sheet = self.book.create_sheet('环境信息')
+        env_sheet['A1'] = '名称'
+        env_sheet['B1'] = '源'
+        env_sheet['C1'] = '目标'
+        env_sheet['D1'] = '校验结果'
+        env_data = self.__get_env_info_data()
+        logging.info(f'{env_data}')
+        self.__write_env_info_to_excel(env_sheet, env_data)
+
+    def __write_env_info_to_excel(self, cur_sheet, data):
+        """ write env info data to excel """
+        cur_row = cur_row = int(cur_sheet.max_row) + 1
+
+        for row in data:
+            cur_sheet.cell(row=cur_row, column=1).value = row[0]
+            cur_sheet.cell(row=cur_row, column=2).value = row[1]
+            cur_sheet.cell(row=cur_row, column=3).value = row[2]
+            cur_sheet.cell(row=cur_row, column=4).value = row[3]
+            cur_row += 1
+
+    def __get_env_info_data(self):
+        """ get env info data """
+        env_source_data = self.sqlite_db.sqlite_env_info_object_query('source')
+        env_dest_data = self.sqlite_db.sqlite_env_info_object_query('dest')
+        source_data = {item[0]: item for item in env_source_data}
+        dest_data = {item[0]: item for item in env_dest_data}
+        env_data = self.__format_env_info_data(source_data, dest_data)
+        return env_data
+
+    def __format_env_info_data(self, source, dest):
+        """ format env info data """
+        result = []
+        for name, data in source.items():
+            source_value = data[1]
+            dest_value = dest[name][1]
+            status = varify_data_use_md5(source_value, dest_value)
+            result.append([name, source_value, dest_value, status])
+        return result
+
     def __each_object_sheet_init(self):
         """ create excel sheet """
         self.__first_sheet_init()
-        self.__common_sheet_create('env_info')
+        self.__env_info_sheet_create()
         self.__common_sheet_create('table')
         self.__common_sheet_create('view')
         self.__common_sheet_create('job')
@@ -52,7 +96,7 @@ class ExportEachObjectExcel:
         self.__common_sheet_create('package')
         self.__common_sheet_create('sequence')
         self.__common_sheet_create('type')
-    
+
     def __common_sheet_create(self, object_name):
         """ create each sheet data to excel """
         object_sheet = self.book.create_sheet(object_name.upper())
@@ -60,9 +104,10 @@ class ExportEachObjectExcel:
         object_sheet['B1'] = 'Source Name'
         object_sheet['C1'] = 'Dest Name'
         object_sheet['D1'] = 'Verify Status'
-        object_data = self.sqlite_db.sqlite_oracle_verify_each_object_table_query(object_name)
+        object_data = self.sqlite_db.sqlite_oracle_verify_each_object_table_query(
+            object_name)
         self.__write_each_object_data_to_excel(object_sheet, object_data)
-    
+
     def __write_each_object_data_to_excel(self, cur_sheet, data):
         """ write each object data to first sheet """
         cur_row = int(cur_sheet.max_row) + 1
@@ -97,5 +142,3 @@ class ExportEachObjectExcel:
             cur_sheet.cell(row=cur_row, column=4).value = row[3]
             cur_sheet.cell(row=cur_row, column=5).value = row[4]
             cur_row += 1
-            
-

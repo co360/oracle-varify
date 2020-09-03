@@ -57,17 +57,6 @@ class VerifyObjectStatistic:
 
         return count
 
-    def __compare_env_info_data(self):
-        """ compare oracle env info data """
-        source_data = self.sqlite_db.sqlite_env_info_object_query('source')
-        dest_data = self.sqlite_db.sqlite_env_info_object_query('dest')
-        source_count = len(source_data)
-        dest_count = len(dest_data)
-        verify_count = self.__compare_object_md5(
-            source_data, dest_data, 'env_info', 'env_info')
-        self.__insert_verify_object_table(
-            'env_info', 'env_info', source_count, dest_count, verify_count)
-
     def __insert_verify_object_table(self, owner, object_name, count_source, count_dest, count_error):
         self.sqlite_db.sqlite_verify_object_statistic_insert({
             'object_name': object_name,
@@ -106,8 +95,6 @@ class VerifyObjectStatistic:
         """
         compare object data
         """
-        self.__compare_env_info_data()
-
         for user in users:
             self.__compare_object_data('view', user)
             self.__compare_object_data('job', user)
