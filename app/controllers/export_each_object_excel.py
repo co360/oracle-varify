@@ -51,8 +51,6 @@ class ExportEachObjectExcel:
     def __get_max_cell_width(self, cell_width_list, index, cell_value):
         """ get cell value """
         cell_width = len(str(cell_value))
-        logging.info(f'{cell_width_list}')
-        logging.info(f'{cell_width}')
         if cell_width_list[index] < cell_width:
             cell_width_list[index] = cell_width
 
@@ -82,7 +80,6 @@ class ExportEachObjectExcel:
         alpha_list = [chr(x) for x in range(ord('A'), ord('Z') + 1)]
         for index, num in enumerate(cell_width_list, start=0):
             cur_cell_name = alpha_list[index]
-            logging.info(f'{cur_cell_name}')
             cell_width = num + 5 if num > 15 else 20
             cur_sheet.column_dimensions[cur_cell_name].width = cell_width
 
@@ -131,6 +128,10 @@ class ExportEachObjectExcel:
             object_sheet, ['Schemal', '源名称', '目标名称', '校验状态'])
         object_data = self.sqlite_db.sqlite_oracle_verify_each_object_table_query(
             object_name)
+
+        if not len(object_data):
+            object_sheet.sheet_properties.tabColor = 'FFFF00'
+
         self.__write_each_object_data_to_excel(object_sheet, object_data)
 
     def __write_each_object_data_to_excel(self, cur_sheet, data):
@@ -197,7 +198,7 @@ class ExportEachObjectExcel:
                 cur_cell.value = item
                 self.__get_max_cell_width(cell_width_list, index-1, item)
                 self.__format_normal_cell(cur_cell)
-                
+
                 if index == 2:
                     cur_cell.value = item.upper()
                 if bool(row[-1]):
