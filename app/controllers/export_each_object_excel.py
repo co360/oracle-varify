@@ -138,6 +138,11 @@ class ExportEachObjectExcel:
         """ format normal cell style """
         cell_font = Font(name=u'微软雅黑', size=11)
         cur_cell.font = cell_font
+    
+    def __format_error_cell(self, cur_cell):
+        """ format normal cell style """
+        fill = PatternFill("solid", fgColor="cc3b3b")
+        cur_cell.fill = fill
 
     def __write_objects_statis_data_to_excel(self, cur_sheet, data):
         """ write objects statistic data to first sheet """
@@ -146,9 +151,10 @@ class ExportEachObjectExcel:
         for row in data:
             for index, item in enumerate(row, start=1):
                 cur_cell = cur_sheet.cell(cur_row, index)
+                cur_cell.value = item
                 if index == 2:
                     cur_cell.value = item.upper()
-                else:
-                    cur_cell.value = item
-                self.__format_normal_cell(cur_cell)
+                if bool(row[-1]):
+                    logging.info(f'{row}')
+                    self.__format_error_cell(cur_cell)
             cur_row += 1
