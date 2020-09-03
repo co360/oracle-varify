@@ -19,13 +19,6 @@ from ..common.common import get_all_data_from_ini_file
 from ..models import SqliteDB
 
 
-def collect_oracle_tables(oracle_db, sqlite_db, user, tag):
-    """ collect oracle tables data """
-    user_tables = oracle_db.get_user_tables_data(user)
-    sqlite_db.sqlite_table_insert(user_tables, tag)
-    logging.info(f'{user} table is {user_tables}')
-
-
 def collect_oracle_common_object(oracle_db, sqlite_db, object_name, user, tag):
     """ collect common objects data """
     user_objects = oracle_db.get_user_objects(user, object_name)
@@ -63,7 +56,7 @@ def collect_oracle_data(sqlite_db, config, users, tag):
     collect_oracle_env_info_data(oracle_db, sqlite_db, tag)
 
     for user in users:
-        collect_oracle_tables(oracle_db, sqlite_db, user, tag)
+        collect_oracle_common_object(oracle_db, sqlite_db, 'table', user, tag)
         collect_oracle_common_object(oracle_db, sqlite_db, 'view', user, tag)
         collect_oracle_common_object(oracle_db, sqlite_db, 'job', user, tag)
         collect_oracle_common_object(
@@ -110,10 +103,10 @@ def collect_oracle_init():
         return False
 
     users = target_users.split(',')
-# 
-    # sqlite_db = SqliteDB()
-    # sqlite_db_reset(sqlite_db)
-    # collect_oracle_data(sqlite_db, source_oracle_config, users, 'source')
-    # collect_oracle_data(sqlite_db, dest_oracle_config, users, 'dest')
-    # VerifyObjectStatistic(users)
+
+    sqlite_db = SqliteDB()
+    sqlite_db_reset(sqlite_db)
+    collect_oracle_data(sqlite_db, source_oracle_config, users, 'source')
+    collect_oracle_data(sqlite_db, dest_oracle_config, users, 'dest')
+    VerifyObjectStatistic(users)
     ExportEachObjectExcel()

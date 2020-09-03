@@ -20,7 +20,8 @@ class VerifyObjectStatistic:
 
         for object_name, object_item in object_data.items():
             result += 1
-            self.__insert_verify_each_object_table(user, '__lose__', object_name, object_type, False)
+            self.__insert_verify_each_object_table(
+                user, '__lose__', object_name, object_type, False)
         return result
 
     def __compare_object_md5(self, source, dest, user, object_type):
@@ -43,25 +44,18 @@ class VerifyObjectStatistic:
                 logging.info(f'varify is {status}')
                 if not status:
                     count += 1
-                self.__insert_verify_each_object_table(user, source_object_name, source_object_name, object_type, status)
+                self.__insert_verify_each_object_table(
+                    user, source_object_name, source_object_name, object_type, status)
             else:
-                self.__insert_verify_each_object_table(user, source_object_name, '__lose__', object_type, False)
+                self.__insert_verify_each_object_table(
+                    user, source_object_name, '__lose__', object_type, False)
                 count += 1
-                
-        dest_more_count = self.__count_more_objects(dest_obj, object_type, user)
+
+        dest_more_count = self.__count_more_objects(
+            dest_obj, object_type, user)
         count += dest_more_count
 
         return count
-
-    def __compare_object_table_data(self, user):
-        """ compare table data """
-        source_data = self.sqlite_db.sqlite_table_object_query('source', user)
-        dest_data = self.sqlite_db.sqlite_table_object_query('dest', user)
-        source_count = len(source_data)
-        dest_count = len(dest_data)
-        verify_count = self.__compare_object_md5(source_data, dest_data, user, 'table')
-        self.__insert_verify_object_table(
-            user, 'table', source_count, dest_count, verify_count)
 
     def __compare_env_info_data(self):
         """ compare oracle env info data """
@@ -69,7 +63,8 @@ class VerifyObjectStatistic:
         dest_data = self.sqlite_db.sqlite_env_info_object_query('dest')
         source_count = len(source_data)
         dest_count = len(dest_data)
-        verify_count = self.__compare_object_md5(source_data, dest_data, 'env_info', 'env_info')
+        verify_count = self.__compare_object_md5(
+            source_data, dest_data, 'env_info', 'env_info')
         self.__insert_verify_object_table(
             'env_info', 'env_info', source_count, dest_count, verify_count)
 
@@ -101,7 +96,8 @@ class VerifyObjectStatistic:
             object_name, 'dest', user)
         source_count = len(source_data)
         dest_count = len(dest_data)
-        verify_count = self.__compare_object_md5(source_data, dest_data, user, object_name)
+        verify_count = self.__compare_object_md5(
+            source_data, dest_data, user, object_name)
         logging.info(f'{source_count}, {dest_count}, {verify_count}')
         self.__insert_verify_object_table(
             user, object_name, source_count, dest_count, verify_count)
@@ -126,4 +122,4 @@ class VerifyObjectStatistic:
             self.__compare_object_data('package', user)
             self.__compare_object_data('sequence', user)
             self.__compare_object_data('type', user)
-            self.__compare_object_table_data(user)
+            self.__compare_object_data('table', user)
