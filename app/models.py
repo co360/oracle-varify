@@ -49,21 +49,21 @@ class SqliteDB:
         """ drop all sqlite tables """
         with sqlite3.connect(self.db) as connection:
             cursor = connection.cursor()
-            # self.__sqlite_drop_table(cursor, self.oracle_table)
-            # self.__sqlite_drop_table(cursor, self.oracle_view)
-            # self.__sqlite_drop_table(cursor, self.oracle_job)
-            # self.__sqlite_drop_table(cursor, self.oracle_synonym)
-            # self.__sqlite_drop_table(cursor, self.oracle_materialized_view)
-            # self.__sqlite_drop_table(cursor, self.oracle_trigger)
-            # self.__sqlite_drop_table(cursor, self.oracle_dblink)
-            # self.__sqlite_drop_table(cursor, self.oracle_function)
-            # self.__sqlite_drop_table(cursor, self.oracle_procedure)
-            # self.__sqlite_drop_table(cursor, self.oracle_index)
-            # self.__sqlite_drop_table(cursor, self.oracle_table_partition)
-            # self.__sqlite_drop_table(cursor, self.oracle_package)
-            # self.__sqlite_drop_table(cursor, self.oracle_sequence)
-            # self.__sqlite_drop_table(cursor, self.oracle_type)
-            # self.__sqlite_drop_table(cursor, self.oracle_env_info)
+            self.__sqlite_drop_table(cursor, self.oracle_table)
+            self.__sqlite_drop_table(cursor, self.oracle_view)
+            self.__sqlite_drop_table(cursor, self.oracle_job)
+            self.__sqlite_drop_table(cursor, self.oracle_synonym)
+            self.__sqlite_drop_table(cursor, self.oracle_materialized_view)
+            self.__sqlite_drop_table(cursor, self.oracle_trigger)
+            self.__sqlite_drop_table(cursor, self.oracle_dblink)
+            self.__sqlite_drop_table(cursor, self.oracle_function)
+            self.__sqlite_drop_table(cursor, self.oracle_procedure)
+            self.__sqlite_drop_table(cursor, self.oracle_index)
+            self.__sqlite_drop_table(cursor, self.oracle_table_partition)
+            self.__sqlite_drop_table(cursor, self.oracle_package)
+            self.__sqlite_drop_table(cursor, self.oracle_sequence)
+            self.__sqlite_drop_table(cursor, self.oracle_type)
+            self.__sqlite_drop_table(cursor, self.oracle_env_info)
             self.__sqlite_drop_table(
                 cursor, self.oracle_verify_object_statistic)
             self.__sqlite_drop_table(
@@ -109,7 +109,7 @@ class SqliteDB:
                 CREATE TABLE {self.oracle_verify_object_statistic}(
                     p_ID INTEGER PRIMARY KEY AUTOINCREMENT,
                     owner CHAR(100) NOT NULL,      
-                    object CHAR(100) NOT NULL,      
+                    object_name CHAR(100) NOT NULL,      
                     count_source INTEGER NOT NULL,
                     count_dest INTEGER NOT NULL,
                     count_error INTEGER NOT NULL)'''
@@ -211,32 +211,32 @@ class SqliteDB:
         """ create all sqlite tables """
         with sqlite3.connect(self.db) as connection:
             cursor = connection.cursor()
-            # self.__sqlite_oracle_table_create(cursor)
-            # # self.__sqlite_oracle_common_table_create(cursor, self.oracle_view)
-            # # self.__sqlite_oracle_common_table_create(cursor, self.oracle_job)
-            # self.__sqlite_oracle_common_table_create(
-                # cursor, self.oracle_synonym)
-            # self.__sqlite_oracle_common_table_create(
-                # cursor, self.oracle_materialized_view)
-            # self.__sqlite_oracle_common_table_create(
-                # cursor, self.oracle_trigger)
-            # self.__sqlite_oracle_common_table_create(
-                # cursor, self.oracle_dblink)
-            # self.__sqlite_oracle_common_table_create(
-                # cursor, self.oracle_function)
-            # self.__sqlite_oracle_common_table_create(
-                # cursor, self.oracle_procedure)
-            # self.__sqlite_oracle_common_table_create(
-                # cursor, self.oracle_index)
-            # self.__sqlite_oracle_common_table_create(
-                # cursor, self.oracle_table_partition)
-            # self.__sqlite_oracle_common_table_create(
-                # cursor, self.oracle_package)
-            # self.__sqlite_oracle_common_table_create(
-                # cursor, self.oracle_sequence)
-            # self.__sqlite_oracle_common_table_create(
-                # cursor, self.oracle_type)
-            # self.__sqlite_oracle_env_info_create(cursor)
+            self.__sqlite_oracle_table_create(cursor)
+            self.__sqlite_oracle_common_table_create(cursor, self.oracle_view)
+            self.__sqlite_oracle_common_table_create(cursor, self.oracle_job)
+            self.__sqlite_oracle_common_table_create(
+                cursor, self.oracle_synonym)
+            self.__sqlite_oracle_common_table_create(
+                cursor, self.oracle_materialized_view)
+            self.__sqlite_oracle_common_table_create(
+                cursor, self.oracle_trigger)
+            self.__sqlite_oracle_common_table_create(
+                cursor, self.oracle_dblink)
+            self.__sqlite_oracle_common_table_create(
+                cursor, self.oracle_function)
+            self.__sqlite_oracle_common_table_create(
+                cursor, self.oracle_procedure)
+            self.__sqlite_oracle_common_table_create(
+                cursor, self.oracle_index)
+            self.__sqlite_oracle_common_table_create(
+                cursor, self.oracle_table_partition)
+            self.__sqlite_oracle_common_table_create(
+                cursor, self.oracle_package)
+            self.__sqlite_oracle_common_table_create(
+                cursor, self.oracle_sequence)
+            self.__sqlite_oracle_common_table_create(
+                cursor, self.oracle_type)
+            self.__sqlite_oracle_env_info_create(cursor)
             self.__sqlite_oracle_verify_object_statistic_create(cursor)
             self.__sqlite_oracle_verify_each_object_table_create(cursor)
             self.__sqlite_oracle_verify_table_row_create(cursor)
@@ -284,12 +284,12 @@ class SqliteDB:
         """ insert object table data """
         with sqlite3.connect(self.db) as connection:
             cursor = connection.cursor()
-            object = data['object']
+            object_name = data['object_name']
             count_source = data['count_source']
             count_dest = data['count_dest']
             count_error = data['count_error']
             owner = data['owner']
-            sql = f'INSERT INTO {self.oracle_verify_object_statistic} VALUES (NULL, "{owner}", "{object}", "{count_source}", "{count_dest}", "{count_error}")'
+            sql = f'INSERT INTO {self.oracle_verify_object_statistic} VALUES (NULL, "{owner}", "{object_name}", "{count_source}", "{count_dest}", "{count_error}")'
             cursor.execute(sql)
 
     def sqlite_verify_each_object_insert(self, data):
@@ -303,3 +303,11 @@ class SqliteDB:
             verify_status = data['verify_status']
             sql = f'INSERT INTO {self.oracle_verify_each_object_data} VALUES (NULL, "{owner}", "{name_source}", "{name_dest}", "{object_type}", "{verify_status}")'
             cursor.execute(sql)
+
+    def sqlite_verify_object_statistic_query(self):
+        """ return oracle objects statics data """
+        with sqlite3.connect(self.db) as connection:
+            cursor = connection.cursor()
+            sql = f'select owner, object_name, count_source, count_dest, count_error from {self.oracle_verify_object_statistic} ORDER BY owner ASC'
+            result = cursor.execute(sql)
+            return list(result)

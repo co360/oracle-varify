@@ -73,9 +73,9 @@ class VerifyObjectStatistic:
         self.__insert_verify_object_table(
             'env_info', 'env_info', source_count, dest_count, verify_count)
 
-    def __insert_verify_object_table(self, owner, object, count_source, count_dest, count_error):
+    def __insert_verify_object_table(self, owner, object_name, count_source, count_dest, count_error):
         self.sqlite_db.sqlite_verify_object_statistic_insert({
-            'object': object,
+            'object_name': object_name,
             'count_source': count_source,
             'count_dest': count_dest,
             'count_error': count_error,
