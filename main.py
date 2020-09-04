@@ -10,15 +10,20 @@
 oracle to oracle varify tool
 """
 
-import logging 
+import logging
 from app.controllers.get_oracle_data import collect_oracle_init
 from app.controllers.get_oracle_table_primarykey import GetOracleTablePrimaryKey
+from app.controllers.verify_source_and_dest_tables import VerifySourceAndDestTables
 
-logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s: %(message)s')
+logging.basicConfig(level=logging.INFO,
+                    format='[%(asctime)s] %(levelname)s: %(message)s')
+
 
 def init():
-    collect_oracle_init()
-    GetOracleTablePrimaryKey()
+    # collect_oracle_init()
+    # GetOracleTablePrimaryKey()
+    VerifySourceAndDestTables()
+
 
 if __name__ == '__main__':
     init()

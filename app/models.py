@@ -36,6 +36,8 @@ class SqliteDB:
         self.oracle_verify_table_row = oracle_table_name['oracle_verify_table_row']
         self.oracle_table_primary = oracle_table_name['oracle_table_primary']
         self.oracle_table_column = oracle_table_name['oracle_table_column']
+        self.oracle_table_data_verify = oracle_table_name['oracle_table_data_verify']
+        self.oracle_table_foreach_query = oracle_table_name['oracle_table_foreach_query']
 
     def __sqlite_drop_table(self, cursor, table):
         """ drop target table from sqlite """
@@ -53,8 +55,10 @@ class SqliteDB:
         logging.info('Start delete tables, waiting!!!')
         with sqlite3.connect(self.db) as connection:
             cursor = connection.cursor()
-            self.__sqlite_drop_table(cursor, self.oracle_table_primary)
-            self.__sqlite_drop_table(cursor, self.oracle_table_column)
+            # self.__sqlite_drop_table(cursor, self.oracle_table_primary)
+            # self.__sqlite_drop_table(cursor, self.oracle_table_column)
+            self.__sqlite_drop_table(cursor, self.oracle_table_data_verify)
+            self.__sqlite_drop_table(cursor, self.oracle_table_foreach_query)
 
     def oracle_tables_drop(self):
         """ drop all sqlite tables """
@@ -170,6 +174,34 @@ class SqliteDB:
                     verify_percent CHAR(10) NOT NULL)'''
                        )
 
+    def __sqlite_oracle_table_data_verify_create(self, cursor):
+        """ create oracle table verify source and dest table to sqlite """
+        logging.info(f'Create table {self.oracle_table_data_verify}')
+        cursor.execute(f'''
+                CREATE TABLE {self.oracle_table_data_verify}(
+                    p_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    owner CHAR(100) NOT NULL,      
+                    table_name CHAR(100) NOT NULL,      
+                    source_primary_value TEXT NOT NULL,
+                    dest_primary_value TEXT NOT NULL,
+                    verify_status CHAR(10) NOT NULL)'''
+                       )
+
+    def __sqlite_oracle_table_foreach_query_create(self, cursor):
+        """ create oracle table foreach query table to sqlite """
+        logging.info(f'Create table {self.oracle_table_foreach_query}')
+        cursor.execute(f'''
+                CREATE TABLE {self.oracle_table_foreach_query}(
+                    p_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    owner CHAR(100) NOT NULL,      
+                    table_name CHAR(100) NOT NULL,      
+                    datetime CHAR(20) NOT NULL,
+                    page INTEGER NOT NULL,
+                    per_page INTEGER NOT NULL,
+                    primary_value_ceil TEXT NOT NULL,
+                    primary_value_floor TEXT NOT NULL)'''
+                       )
+
     def __get_table_name(self, table_name):
         """ get define table name """
         result = ''
@@ -242,8 +274,10 @@ class SqliteDB:
         """ create table data tables """
         with sqlite3.connect(self.db) as connection:
             cursor = connection.cursor()
-            self.__sqlite_oracle_table_primary_table_create(cursor)
-            self.__sqlite_oracle_table_column_table_create(cursor)
+            # self.__sqlite_oracle_table_primary_table_create(cursor)
+            # self.__sqlite_oracle_table_column_table_create(cursor)
+            self.__sqlite_oracle_table_data_verify_create(cursor)
+            self.__sqlite_oracle_table_foreach_query_create(cursor)
 
     def oracle_tables_create(self):
         """ create all sqlite tables """
@@ -344,6 +378,32 @@ class SqliteDB:
             sql = f'INSERT INTO {self.oracle_table_column} VALUES (NULL, "{owner}", "{table_name}", "{columns}", "{primarys}", "{primary_types}", "{verify_percent}")'
             cursor.execute(sql)
 
+    def sqlite_oracle_table_data_verify__insert(self, data):
+        """ insert oracle table data verify column data """
+        with sqlite3.connect(self.db) as connection:
+            cursor = connection.cursor()
+            owner = data['owner']
+            table_name = data['table_name']
+            source_primary_value = data['source_primary_value']
+            dest_primary_value = data['dest_primary_value']
+            verify_status = data['verify_status']
+            sql = f'INSERT INTO {self.oracle_table_data_verify} VALUES (NULL, "{owner}", "{table_name}", "{source_primary_value}", "{dest_primary_value}", "{verify_status}")'
+            cursor.execute(sql)
+
+    def sqlite_oracle_table_foreach_query_insert(self, data):
+        """ insert oracle table data verify column data """
+        with sqlite3.connect(self.db) as connection:
+            cursor = connection.cursor()
+            owner = data['owner']
+            table_name = data['table_name']
+            datetime = data['datetime']
+            page = data['page']
+            per_page = data['per_page']
+            primary_value_ceil = data['primary_value_ceil']
+            primary_value_floor = data['primary_value_floor']
+            sql = f'INSERT INTO {self.oracle_table_data_verify} VALUES (NULL, "{owner}", "{table_name}", "{datetime}", "{page}", "{per_page}", "{primary_value_ceil}", "{primary_value_floor}")'
+            cursor.execute(sql)
+
     def sqlite_verify_object_statistic_query(self):
         """ return oracle objects statics data """
         with sqlite3.connect(self.db) as connection:
@@ -360,5 +420,21 @@ class SqliteDB:
                 sql = f'select owner, name_source, name_dest, verify_status from {self.oracle_verify_each_object_data} where object_type = "{object_name}" ORDER BY owner ASC'
             elif status == 'True':
                 sql = f'select owner, name_source, verify_status from {self.oracle_verify_each_object_data} where object_type = "{object_name}" and verify_status = "True" ORDER BY owner ASC'
+            result = cursor.execute(sql)
+            return list(result)
+
+    def sqlite_oracle_table_column_table_query(self):
+        """ return verify each object table data """
+        with sqlite3.connect(self.db) as connection:
+            cursor = connection.cursor()
+            sql = f'select owner, table_name, columns, primarys, verify_percent from {self.oracle_table_column} ORDER BY owner ASC'
+            result = cursor.execute(sql)
+            return list(result)
+
+    def sqlite_oracle_table_foreach_query_query(self):
+        """ return verify each object table data """
+        with sqlite3.connect(self.db) as connection:
+            cursor = connection.cursor()
+            sql = f'select owner, table_name, datetime, page, per_page, primary_value_ceil, primary_value_floor from {self.oracle_table_foreach_query} ORDER BY owner ASC'
             result = cursor.execute(sql)
             return list(result)

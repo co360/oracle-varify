@@ -1,6 +1,5 @@
 import os
 import logging
-from configparser import ConfigParser
 from ..common.oracle_client import OracleDB
 from ..common.common import get_data_from_oracle_config_ini
 from ..models import SqliteDB
@@ -22,7 +21,6 @@ class GetOracleTablePrimaryKey:
         self.config_dvt = get_data_from_oracle_config_ini('dvt')
         self.source_oracle_db = self.__oracle_login_init('source')
         logging.info(self.config_dvt)
-        # self.dest_oracle_db = self.__oracle_login_init('dest')
 
     def __oracle_login_init(self, type: str):
         """ check oracle db status """
