@@ -11,7 +11,6 @@
 """
 import os
 import logging
-from configparser import ConfigParser
 from .verify_object_statistic import VerifyObjectStatistic
 from .export_each_object_excel import ExportEachObjectExcel
 from ..common.oracle_client import OracleDB

@@ -34,9 +34,11 @@ class SqliteDB:
         self.oracle_verify_object_statistic = oracle_table_name['oracle_verify_object_statistic']
         self.oracle_verify_each_object_data = oracle_table_name['oracle_verify_each_object_data']
         self.oracle_verify_table_row = oracle_table_name['oracle_verify_table_row']
+        self.oracle_table_primary = oracle_table_name['oracle_table_primary']
 
     def __sqlite_drop_table(self, cursor, table):
         """ drop target table from sqlite """
+        logging.info(f'Drop table {table}')
         check_table = f"select count(*) from sqlite_master where type='table' and name='{table}'"
         logging.info(f'check table sql is {check_table}')
         table_status = [item[0] for item in cursor.execute(check_table)][0]
@@ -45,8 +47,16 @@ class SqliteDB:
             logging.warn(f'table {table} is exist, drop it')
             cursor.execute(f'drop table {table}')
 
+    def oracle_table_data_tables_drop(self):
+        """ delete table data tables """
+        logging.info('Start delete tables, waiting!!!')
+        with sqlite3.connect(self.db) as connection:
+            cursor = connection.cursor()
+            self.__sqlite_drop_table(cursor, self.oracle_table_primary)
+
     def oracle_tables_drop(self):
         """ drop all sqlite tables """
+        logging.info('Start delete tables, waiting!!!')
         with sqlite3.connect(self.db) as connection:
             cursor = connection.cursor()
             self.__sqlite_drop_table(cursor, self.oracle_table)
@@ -72,6 +82,7 @@ class SqliteDB:
 
     def __sqlite_oracle_common_table_create(self, cursor, table_name):
         """ create common ddl table to sqlite """
+        logging.info(f'Create table {table_name}')
         cursor.execute(f'''
                 CREATE TABLE {table_name}(
                     p_ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -83,6 +94,7 @@ class SqliteDB:
 
     def __sqlite_oracle_env_info_create(self, cursor):
         """ create oracle statistic to sqlite """
+        logging.info(f'Create table {self.oracle_env_info}')
         cursor.execute(f'''
                 CREATE TABLE {self.oracle_env_info}(
                     p_ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -93,6 +105,7 @@ class SqliteDB:
 
     def __sqlite_oracle_verify_object_statistic_create(self, cursor):
         """ create oracle statistic to sqlite """
+        logging.info(f'Create table {self.oracle_verify_object_statistic}')
         cursor.execute(f'''
                 CREATE TABLE {self.oracle_verify_object_statistic}(
                     p_ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -105,6 +118,7 @@ class SqliteDB:
 
     def __sqlite_oracle_verify_each_object_table_create(self, cursor):
         """ create oracle each object data to sqlite """
+        logging.info(f'Create table {self.oracle_verify_each_object_data}')
         cursor.execute(f'''
                 CREATE TABLE {self.oracle_verify_each_object_data}(
                     p_ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -117,6 +131,7 @@ class SqliteDB:
 
     def __sqlite_oracle_verify_table_row_create(self, cursor):
         """ create oracle table row to sqlite """
+        logging.info(f'Create table {self.oracle_verify_table_row}')
         cursor.execute(f'''
                 CREATE TABLE {self.oracle_verify_table_row}(
                     p_ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -125,6 +140,18 @@ class SqliteDB:
                     primary_group CHAR(100) NOT NULL,
                     primary_group_value CHAR(100) NOT NULL,
                     tag CHAR(10) NOT NULL)'''
+                       )
+
+    def __sqlite_oracle_table_primary_table_create(self, cursor):
+        """ create oracle table primary table to sqlite """
+        logging.info(f'Create table {self.oracle_table_primary}')
+        cursor.execute(f'''
+                CREATE TABLE {self.oracle_table_primary}(
+                    p_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    owner CHAR(100) NOT NULL,      
+                    table_name CHAR(100) NOT NULL,      
+                    primary_status CHAR(10) NOT NULL,
+                    primary_key_value CHAR(100) NOT NULL)'''
                        )
 
     def __get_table_name(self, table_name):
@@ -194,6 +221,12 @@ class SqliteDB:
                 sql = f'INSERT INTO {self.oracle_env_info} VALUES (NULL, "{key}", "{value}", "{tag}")'
                 logging.info(f'insert into table sql is {sql}')
                 cursor.execute(sql)
+
+    def oracle_table_data_tables_create(self):
+        """ create table data tables """
+        with sqlite3.connect(self.db) as connection:
+            cursor = connection.cursor()
+            self.__sqlite_oracle_table_primary_table_create(cursor)
 
     def oracle_tables_create(self):
         """ create all sqlite tables """
@@ -278,10 +311,13 @@ class SqliteDB:
             result = cursor.execute(sql)
             return list(result)
 
-    def sqlite_oracle_verify_each_object_table_query(self, object_name):
+    def sqlite_oracle_verify_each_object_table_query(self, object_name, status='ALL'):
         """ return verify each object table data """
         with sqlite3.connect(self.db) as connection:
             cursor = connection.cursor()
-            sql = f'select owner, name_source, name_dest, verify_status from {self.oracle_verify_each_object_data} where object_type = "{object_name}" ORDER BY owner ASC'
+            if status == 'ALL':
+                sql = f'select owner, name_source, name_dest, verify_status from {self.oracle_verify_each_object_data} where object_type = "{object_name}" ORDER BY owner ASC'
+            elif status == 'True':
+                sql = f'select owner, name_source, verify_status from {self.oracle_verify_each_object_data} where object_type = "{object_name}" and verify_status = "True" ORDER BY owner ASC'
             result = cursor.execute(sql)
             return list(result)

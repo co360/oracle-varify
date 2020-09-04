@@ -1,4 +1,4 @@
 *.pyc
 .vscode/*
-app/oracle.db
+app/oracle.db*
 excel/*
