@@ -303,6 +303,17 @@ class SqliteDB:
             sql = f'INSERT INTO {self.oracle_verify_each_object_data} VALUES (NULL, "{owner}", "{name_source}", "{name_dest}", "{object_type}", "{verify_status}")'
             cursor.execute(sql)
 
+    def sqlite_oracle_table_primary_table_insert(self, data):
+        """ insert object table data """
+        with sqlite3.connect(self.db) as connection:
+            cursor = connection.cursor()
+            owner = data['owner']
+            table_name = data['table_name']
+            primary_status = data['primary_status']
+            primary_key_value = data['primary_key_value']
+            sql = f'INSERT INTO {self.oracle_table_primary} VALUES (NULL, "{owner}", "{table_name}", "{primary_status}", "{primary_key_value}")'
+            cursor.execute(sql)
+
     def sqlite_verify_object_statistic_query(self):
         """ return oracle objects statics data """
         with sqlite3.connect(self.db) as connection:
