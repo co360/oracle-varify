@@ -56,98 +56,98 @@ class OracleDB:
         logging.info(f'====== table sql is {sql}')
         return {item[1]: list(item) for item in self.cursor.execute(sql)}
 
-    def get_user_views(self, user):
+    def __get_user_views(self, user):
         """ get user views """
         sql = self.sql_data['get_user_view_status']
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
-    def get_user_tables(self, user):
+    def __get_user_tables(self, user):
         """ get user tables """
         sql = self.sql_data['get_user_table_status']
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
-    def get_user_jobs(self, user):
+    def __get_user_jobs(self, user):
         """ get user jobs """
         sql = self.sql_data['get_user_job_status']
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
-    def get_user_types(self, user):
+    def __get_user_types(self, user):
         """ get user type """
         sql = self.sql_data['get_user_type_status']
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
-    def get_user_sequences(self, user):
+    def __get_user_sequences(self, user):
         """ get user sequences """
         sql = self.sql_data['get_user_sequence_status']
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
-    def get_user_packages(self, user):
+    def __get_user_packages(self, user):
         """ get user packages """
         sql = self.sql_data['get_user_package']
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
-    def get_user_table_pratitions(self, user):
+    def __get_user_table_pratitions(self, user):
         """ get user table_partitions """
         sql = self.sql_data['get_user_table_partition_status']
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
-    def get_user_indexs(self, user):
+    def __get_user_indexs(self, user):
         """ get user indexs """
         sql = self.sql_data['get_user_index_status']
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
-    def get_user_procedures(self, user):
+    def __get_user_procedures(self, user):
         """ get user procedures """
         sql = self.sql_data['get_user_procedure_status']
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
-    def get_user_functions(self, user):
+    def __get_user_functions(self, user):
         """ get user functions """
         sql = self.sql_data['get_user_function_status']
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
-    def get_user_dblinks(self, user):
+    def __get_user_dblinks(self, user):
         """ get user dblinks """
         sql = self.sql_data['get_user_dblink']
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
-    def get_user_triggers(self, user):
+    def __get_user_triggers(self, user):
         """ get user triggers """
         sql = self.sql_data['get_user_triggers']
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
-    def get_user_materialized_views(self, user):
+    def __get_user_materialized_views(self, user):
         """ get user materialized_view """
         sql = self.sql_data['get_user_materialized_view']
         sql = sql.format(owner=user)
         result = [list(item) for item in self.cursor.execute(sql)]
         return result
 
-    def get_user_synonyms(self, user):
+    def __get_user_synonyms(self, user):
         """ get user synonyms """
         sql = self.sql_data['get_user_synonym_status']
         sql = sql.format(owner=user)
@@ -194,33 +194,33 @@ class OracleDB:
         """ get common result objects """
         result = None
         if object_name == 'view':
-            result = self.get_user_views(user)
+            result = self.__get_user_views(user)
         elif object_name == 'table':
-            result = self.get_user_tables(user)
+            result = self.__get_user_tables(user)
         elif object_name == 'job':
-            result = self.get_user_jobs(user)
+            result = self.__get_user_jobs(user)
         elif object_name == 'synonym':
-            result = self.get_user_synonyms(user)
+            result = self.__get_user_synonyms(user)
         elif object_name == 'materialized_view':
-            result = self.get_user_materialized_views(user)
+            result = self.__get_user_materialized_views(user)
         elif object_name == 'trigger':
-            result = self.get_user_triggers(user)
+            result = self.__get_user_triggers(user)
         elif object_name == 'dblink':
-            result = self.get_user_dblinks(user)
+            result = self.__get_user_dblinks(user)
         elif object_name == 'function':
-            result = self.get_user_functions(user)
+            result = self.__get_user_functions(user)
         elif object_name == 'procedure':
-            result = self.get_user_procedures(user)
+            result = self.__get_user_procedures(user)
         elif object_name == 'index':
-            result = self.get_user_indexs(user)
+            result = self.__get_user_indexs(user)
         elif object_name == 'table_partition':
-            result = self.get_user_table_pratitions(user)
+            result = self.__get_user_table_pratitions(user)
         elif object_name == 'package':
-            result = self.get_user_packages(user)
+            result = self.__get_user_packages(user)
         elif object_name == 'sequence':
-            result = self.get_user_sequences(user)
+            result = self.__get_user_sequences(user)
         elif object_name == 'type':
-            result = self.get_user_types(user)
+            result = self.__get_user_types(user)
         else:
             logging.error(f'Target object {object_name} is error')
             return False

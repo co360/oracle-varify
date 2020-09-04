@@ -18,14 +18,14 @@ from ..common.common import get_all_data_from_ini_file
 from ..models import SqliteDB
 
 
-def collect_oracle_common_object(oracle_db, sqlite_db, object_name, user, tag):
+def collect_oracle_common_object(oracle_db: OracleDB, sqlite_db: SqliteDB, object_name, user, tag):
     """ collect common objects data """
     user_objects = oracle_db.get_user_objects(user, object_name)
     logging.info(f'====== {user_objects}')
     sqlite_db.sqlite_oracle_common_table_insert(user_objects, object_name, tag)
 
 
-def collect_oracle_env_info_data(oracle_db, sqlite_db, tag):
+def collect_oracle_env_info_data(oracle_db: OracleDB, sqlite_db: SqliteDB, tag):
     """ collect oracle statistic data """
     oracle_version = oracle_db.get_oracle_version()
     oracle_charcode = oracle_db.get_oracle_charcode()
@@ -41,7 +41,7 @@ def collect_oracle_env_info_data(oracle_db, sqlite_db, tag):
     }, tag)
 
 
-def collect_oracle_data(sqlite_db, config, users, tag):
+def collect_oracle_data(sqlite_db: SqliteDB, config, users, tag):
     """ collect oracle data and insert data to sqlite """
     oracle_db = OracleDB(config)
     status = oracle_db.connect_oracle()
@@ -82,7 +82,7 @@ def collect_oracle_data(sqlite_db, config, users, tag):
             oracle_db, sqlite_db, 'type', user, tag)
 
 
-def sqlite_db_reset(sqlite_db):
+def sqlite_db_reset(sqlite_db: SqliteDB):
     """ delete sqlite all tables """
     sqlite_db.oracle_tables_drop()
     sqlite_db.oracle_tables_create()
