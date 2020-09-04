@@ -54,4 +54,27 @@ class GetOracleTablePrimaryKey:
             'primary_status': str(status),
             'primary_keys': ','.join(primary_keys) if status else '__empty__'
         })
-        logging.info(f'{owner, primary_keys}')
+
+        status and self.__get_table_columns(owner, table_name, primary_keys)
+
+    def __format_table_column(self, columns: dict, primary_keys: list):
+        """ format columns and primary_keys """
+        column_names = columns.keys
+
+    def __get_table_columns(self, owner: str, table_name: str, primary_keys: list):
+        """ get table column """
+        table_column = self.source_oracle_db.get_oracle_table_column(
+            owner, table_name)
+        columns = ','.join(table_column.keys())
+        primarys = ','.join(primary_keys)
+        primary_type_list = [table_column[item] for item in primary_keys]
+        primary_types = ','.join(primary_type_list)
+        self.sqlite_db.sqlite_oracle_table_column_table__insert({
+            'owner': owner,
+            'table_name': table_name,
+            'columns': columns,
+            'primarys': primarys,
+            'primary_types': primary_types
+        })
+
+        logging.info(f'{owner, columns, primarys, primary_types}')

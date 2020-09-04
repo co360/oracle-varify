@@ -191,12 +191,19 @@ class OracleDB:
         return result
 
     def get_oracle_table_primary_key(self, owner: str, table_name: str):
-        """ get oracle nls sort """
+        """ get oracle table primary key """
         sql = self.sql_data["get_oracle_table_primarykey"]
-        sql = sql.format(owner=owner, table_name = table_name)
-        logging.info(f'sql {sql}')
+        sql = sql.format(owner=owner, table_name=table_name)
         primary_list = [item[0] for item in self.cursor.execute(sql)]
         return primary_list
+
+    def get_oracle_table_column(self, owner: str, table_name: str):
+        """ get oracle table column """
+        sql = self.sql_data["get_oracle_table_column"]
+        sql = sql.format(owner=owner, table_name=table_name)
+        column_list = [item for item in self.cursor.execute(sql)]
+        result = {item[0]: item[1] for item in column_list}
+        return result
 
     def get_user_objects(self, user, object_name):
         """ get common result objects """

@@ -35,6 +35,7 @@ class SqliteDB:
         self.oracle_verify_each_object_data = oracle_table_name['oracle_verify_each_object_data']
         self.oracle_verify_table_row = oracle_table_name['oracle_verify_table_row']
         self.oracle_table_primary = oracle_table_name['oracle_table_primary']
+        self.oracle_table_column = oracle_table_name['oracle_table_column']
 
     def __sqlite_drop_table(self, cursor, table):
         """ drop target table from sqlite """
@@ -53,6 +54,7 @@ class SqliteDB:
         with sqlite3.connect(self.db) as connection:
             cursor = connection.cursor()
             self.__sqlite_drop_table(cursor, self.oracle_table_primary)
+            self.__sqlite_drop_table(cursor, self.oracle_table_column)
 
     def oracle_tables_drop(self):
         """ drop all sqlite tables """
@@ -154,6 +156,19 @@ class SqliteDB:
                     primary_keys CHAR(100) NOT NULL)'''
                        )
 
+    def __sqlite_oracle_table_column_table_create(self, cursor):
+        """ create oracle table column table to sqlite """
+        logging.info(f'Create table {self.oracle_table_column}')
+        cursor.execute(f'''
+                CREATE TABLE {self.oracle_table_column}(
+                    p_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    owner CHAR(100) NOT NULL,      
+                    table_name CHAR(100) NOT NULL,      
+                    columns CHAR(200) NOT NULL,
+                    primarys CHAR(100) NOT NULL,
+                    primary_types CHAR(100) NOT NULL)'''
+                       )
+
     def __get_table_name(self, table_name):
         """ get define table name """
         result = ''
@@ -227,6 +242,7 @@ class SqliteDB:
         with sqlite3.connect(self.db) as connection:
             cursor = connection.cursor()
             self.__sqlite_oracle_table_primary_table_create(cursor)
+            self.__sqlite_oracle_table_column_table_create(cursor)
 
     def oracle_tables_create(self):
         """ create all sqlite tables """
@@ -304,7 +320,7 @@ class SqliteDB:
             cursor.execute(sql)
 
     def sqlite_oracle_table_primary_table_insert(self, data):
-        """ insert object table data """
+        """ insert object table primary keys data """
         with sqlite3.connect(self.db) as connection:
             cursor = connection.cursor()
             owner = data['owner']
@@ -312,6 +328,18 @@ class SqliteDB:
             primary_status = data['primary_status']
             primary_keys = data['primary_keys']
             sql = f'INSERT INTO {self.oracle_table_primary} VALUES (NULL, "{owner}", "{table_name}", "{primary_status}", "{primary_keys}")'
+            cursor.execute(sql)
+
+    def sqlite_oracle_table_column_table__insert(self, data):
+        """ insert object table column data """
+        with sqlite3.connect(self.db) as connection:
+            cursor = connection.cursor()
+            owner = data['owner']
+            table_name = data['table_name']
+            columns = data['columns']
+            primarys = data['primarys']
+            primary_types = data['primary_types']
+            sql = f'INSERT INTO {self.oracle_table_column} VALUES (NULL, "{owner}", "{table_name}", "{columns}", "{primarys}", "{primary_types}")'
             cursor.execute(sql)
 
     def sqlite_verify_object_statistic_query(self):
