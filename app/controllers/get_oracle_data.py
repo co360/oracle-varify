@@ -14,7 +14,7 @@ import logging
 from .verify_object_statistic import VerifyObjectStatistic
 from .export_each_object_excel import ExportEachObjectExcel
 from ..common.oracle_client import OracleDB
-from ..common.common import get_all_data_from_ini_file
+from ..common.common import get_data_from_oracle_config_ini
 from ..models import SqliteDB
 
 
@@ -44,13 +44,7 @@ def collect_oracle_env_info_data(oracle_db: OracleDB, sqlite_db: SqliteDB, tag):
 def collect_oracle_data(sqlite_db: SqliteDB, config, users, tag):
     """ collect oracle data and insert data to sqlite """
     oracle_db = OracleDB(config)
-    status = oracle_db.connect_oracle()
-    logging.info(f'status {status}')
-
-    if not status:
-        logging.error(f'Connect oracle error, {config}')
-        return False
-
+    oracle_db.connect_oracle()
     oracle_db.env_init()
     collect_oracle_env_info_data(oracle_db, sqlite_db, tag)
 
@@ -90,10 +84,9 @@ def sqlite_db_reset(sqlite_db: SqliteDB):
 
 def collect_oracle_init():
     """ start to collect oracle init """
-    ini_path = 'config.ini'
-    source_oracle_config = get_all_data_from_ini_file(ini_path, 'source')
-    dest_oracle_config = get_all_data_from_ini_file(ini_path, 'dest')
-    dvt_config = get_all_data_from_ini_file(ini_path, 'dvt')
+    source_oracle_config = get_data_from_oracle_config_ini('source')
+    dest_oracle_config = get_data_from_oracle_config_ini('dest')
+    dvt_config = get_data_from_oracle_config_ini('dvt')
     target_users = dvt_config['verify_schema']
 
     if not target_users:

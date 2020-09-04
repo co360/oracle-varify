@@ -40,7 +40,7 @@ class OracleDB:
                 encoding="UTF-8")
         except:
             logging.error('userInfo error {}'.format(str(self.data)))
-            return False
+            raise Exception("Invalid level!", 'logging oracle error')
         else:
             return True
 
@@ -189,6 +189,12 @@ class OracleDB:
         nls_sort = [str(item) for item in nls_sort]
         result = '-'.join(nls_sort)
         return result
+
+    def get_oracle_table_primary_key(self, owner: str, table_name: str):
+        """ get oracle nls sort """
+        sql = f'{self.sql_data["get_oracle_table_primarykey"]}'
+        primary_list = [item[0] for item in self.cursor.execute(sql)]
+        return primary_list
 
     def get_user_objects(self, user, object_name):
         """ get common result objects """

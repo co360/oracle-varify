@@ -2,6 +2,7 @@ import os
 import logging
 from configparser import ConfigParser
 from ..common.oracle_client import OracleDB
+from ..common.common import get_data_from_oracle_config_ini
 from ..models import SqliteDB
 
 
@@ -17,6 +18,22 @@ class GetOracleTablePrimaryKey:
         """ config table data """
         self.sqlite_db.oracle_table_data_tables_drop()
         self.sqlite_db.oracle_table_data_tables_create()
+        self.config_dvt = get_data_from_oracle_config_ini('dvt')
+        self.source_oracle_db = self.__oracle_login_init('source')
+        self.dest_oracle_db = self.__oracle_login_init('dest')
+
+    def __oracle_login_init(self, type: str):
+        """ check oracle db status """
+        oracle_db = {}
+        if type == 'source' or type == 'dest':
+            login = get_data_from_oracle_config_ini(type)
+            oracle_db = OracleDB(login)
+            oracle_db.connect_oracle
+            oracle_db.env_init()
+        else:
+            logging.error('Please input valid type like source or dest')
+            raise Exception("valid type, shoule like source/dest")
+        return oracle_db
 
     def __get_verify_tables(self):
         tables = self.sqlite_db.sqlite_oracle_verify_each_object_table_query(
@@ -26,6 +43,8 @@ class GetOracleTablePrimaryKey:
             table_name = table[1]
             self.__get_table_primary_key(owner, table_name)
 
-    def __get_table_primary_key(self, owner, table_name):
+    def __get_table_primary_key(self, owner: str, table_name: str):
         """ get table primary key """
-        logging.info(f'{owner, table_name}')
+        primary_keys = self.source_oracle_db.get_oracle_table_primary_key(
+            owner, table_name)
+        logging.info(f'{owner, primary_keys}')

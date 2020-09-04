@@ -52,6 +52,15 @@ def get_all_data_from_ini_file(file_path, container_name):
         return False
 
 
+def get_data_from_oracle_config_ini(container_name: str):
+    """ read data from config.ini """
+    ini_path = 'config.ini'
+    cur_dir = os.path.dirname(os.path.abspath('__file__'))
+    config_path = os.path.join(cur_dir, ini_path)
+    result = get_all_data_from_ini_file(config_path, container_name)
+    return result
+
+
 def varify_data_use_md5(source, dest):
     """
     use md5 verify source and dest equal 
