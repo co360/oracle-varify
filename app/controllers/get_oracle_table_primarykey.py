@@ -20,7 +20,7 @@ class GetOracleTablePrimaryKey:
         self.sqlite_db.oracle_table_data_tables_create()
         self.config_dvt = get_data_from_oracle_config_ini('dvt')
         self.source_oracle_db = self.__oracle_login_init('source')
-        self.dest_oracle_db = self.__oracle_login_init('dest')
+        # self.dest_oracle_db = self.__oracle_login_init('dest')
 
     def __oracle_login_init(self, type: str):
         """ check oracle db status """
@@ -47,4 +47,11 @@ class GetOracleTablePrimaryKey:
         """ get table primary key """
         primary_keys = self.source_oracle_db.get_oracle_table_primary_key(
             owner, table_name)
+        status = bool(primary_keys)
+        self.sqlite_db.sqlite_oracle_table_primary_table_insert({
+            'owner': owner,
+            'table_name': table_name,
+            'primary_status': str(status),
+            'primary_keys': ','.join(primary_keys) if status else '__empty__'
+        })
         logging.info(f'{owner, primary_keys}')

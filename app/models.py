@@ -151,7 +151,7 @@ class SqliteDB:
                     owner CHAR(100) NOT NULL,      
                     table_name CHAR(100) NOT NULL,      
                     primary_status CHAR(10) NOT NULL,
-                    primary_key_value CHAR(100) NOT NULL)'''
+                    primary_keys CHAR(100) NOT NULL)'''
                        )
 
     def __get_table_name(self, table_name):
@@ -310,8 +310,8 @@ class SqliteDB:
             owner = data['owner']
             table_name = data['table_name']
             primary_status = data['primary_status']
-            primary_key_value = data['primary_key_value']
-            sql = f'INSERT INTO {self.oracle_table_primary} VALUES (NULL, "{owner}", "{table_name}", "{primary_status}", "{primary_key_value}")'
+            primary_keys = data['primary_keys']
+            sql = f'INSERT INTO {self.oracle_table_primary} VALUES (NULL, "{owner}", "{table_name}", "{primary_status}", "{primary_keys}")'
             cursor.execute(sql)
 
     def sqlite_verify_object_statistic_query(self):

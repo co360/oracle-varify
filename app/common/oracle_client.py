@@ -192,7 +192,9 @@ class OracleDB:
 
     def get_oracle_table_primary_key(self, owner: str, table_name: str):
         """ get oracle nls sort """
-        sql = f'{self.sql_data["get_oracle_table_primarykey"]}'
+        sql = self.sql_data["get_oracle_table_primarykey"]
+        sql = sql.format(owner=owner, table_name = table_name)
+        logging.info(f'sql {sql}')
         primary_list = [item[0] for item in self.cursor.execute(sql)]
         return primary_list
 
