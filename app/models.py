@@ -50,15 +50,21 @@ class SqliteDB:
             logging.warn(f'table {table} is exist, drop it')
             cursor.execute(f'drop table {table}')
 
+    def oracle_verify_source_dest_tables_drop(self):
+        """ verify source dest tables data """
+        logging.info('Start delete tables, waiting!!!')
+        with sqlite3.connect(self.db) as connection:
+            cursor = connection.cursor()
+            self.__sqlite_drop_table(cursor, self.oracle_table_data_verify)
+            self.__sqlite_drop_table(cursor, self.oracle_table_foreach_query)
+
     def oracle_table_data_tables_drop(self):
         """ delete table data tables """
         logging.info('Start delete tables, waiting!!!')
         with sqlite3.connect(self.db) as connection:
             cursor = connection.cursor()
-            # self.__sqlite_drop_table(cursor, self.oracle_table_primary)
-            # self.__sqlite_drop_table(cursor, self.oracle_table_column)
-            self.__sqlite_drop_table(cursor, self.oracle_table_data_verify)
-            self.__sqlite_drop_table(cursor, self.oracle_table_foreach_query)
+            self.__sqlite_drop_table(cursor, self.oracle_table_primary)
+            self.__sqlite_drop_table(cursor, self.oracle_table_column)
 
     def oracle_tables_drop(self):
         """ drop all sqlite tables """
@@ -169,6 +175,7 @@ class SqliteDB:
                     owner CHAR(100) NOT NULL,      
                     table_name CHAR(100) NOT NULL,      
                     columns CHAR(200) NOT NULL,
+                    num_rows TEXT NOT NULL,
                     primarys CHAR(100) NOT NULL,
                     primary_types CHAR(100) NOT NULL,
                     verify_percent CHAR(10) NOT NULL)'''
@@ -270,14 +277,19 @@ class SqliteDB:
                 logging.info(f'insert into table sql is {sql}')
                 cursor.execute(sql)
 
+    def oracle_verify_source_dest_tables_create(self):
+        """ create verify source and dest tables data """
+        with sqlite3.connect(self.db) as connection:
+            cursor = connection.cursor()
+            self.__sqlite_oracle_table_data_verify_create(cursor)
+            self.__sqlite_oracle_table_foreach_query_create(cursor)
+
     def oracle_table_data_tables_create(self):
         """ create table data tables """
         with sqlite3.connect(self.db) as connection:
             cursor = connection.cursor()
-            # self.__sqlite_oracle_table_primary_table_create(cursor)
-            # self.__sqlite_oracle_table_column_table_create(cursor)
-            self.__sqlite_oracle_table_data_verify_create(cursor)
-            self.__sqlite_oracle_table_foreach_query_create(cursor)
+            self.__sqlite_oracle_table_primary_table_create(cursor)
+            self.__sqlite_oracle_table_column_table_create(cursor)
 
     def oracle_tables_create(self):
         """ create all sqlite tables """
@@ -372,10 +384,11 @@ class SqliteDB:
             owner = data['owner']
             table_name = data['table_name']
             columns = data['columns']
+            num_rows = data['num_rows']
             primarys = data['primarys']
             primary_types = data['primary_types']
             verify_percent = data['verify_percent']
-            sql = f'INSERT INTO {self.oracle_table_column} VALUES (NULL, "{owner}", "{table_name}", "{columns}", "{primarys}", "{primary_types}", "{verify_percent}")'
+            sql = f'INSERT INTO {self.oracle_table_column} VALUES (NULL, "{owner}", "{table_name}", "{columns}", "{num_rows}", "{primarys}", "{primary_types}", "{verify_percent}")'
             cursor.execute(sql)
 
     def sqlite_oracle_table_data_verify__insert(self, data):
@@ -427,7 +440,7 @@ class SqliteDB:
         """ return verify each object table data """
         with sqlite3.connect(self.db) as connection:
             cursor = connection.cursor()
-            sql = f'select owner, table_name, columns, primarys, verify_percent from {self.oracle_table_column} ORDER BY owner ASC'
+            sql = f'select owner, table_name, columns, num_rows, primarys, verify_percent from {self.oracle_table_column} ORDER BY owner ASC'
             result = cursor.execute(sql)
             return list(result)
 

@@ -20,6 +20,7 @@ class GetOracleTablePrimaryKey:
         self.sqlite_db.oracle_table_data_tables_create()
         self.config_dvt = get_data_from_oracle_config_ini('dvt')
         self.source_oracle_db = self.__oracle_login_init('source')
+        self.dest_oracle_db = self.__oracle_login_init('dest')
         logging.info(self.config_dvt)
 
     def __oracle_login_init(self, type: str):
@@ -85,6 +86,9 @@ class GetOracleTablePrimaryKey:
                 verify_percent = 1.0
         return verify_percent
 
+    def __get_table_num_rows(self, owner: str, table_name: str):
+        """ get table rows """
+
     def __get_table_columns(self, owner: str, table_name: str, primary_keys: list):
         """ get table column """
         table_column = self.source_oracle_db.get_oracle_table_column(
@@ -95,14 +99,24 @@ class GetOracleTablePrimaryKey:
         primary_type_list = [table_column[item] for item in primary_keys]
         primary_types = ','.join(primary_type_list)
         verify_percent = self.__get_verify_percent(table_name)
+        source_num_rows = self.source_oracle_db.get_oracle_table_num_rows(
+            owner, table_name)
+        source_num_rows = str(source_num_rows) if source_num_rows else '0'
+        dest_num_rows = self.source_oracle_db.get_oracle_table_num_rows(
+            owner, table_name)
+        dest_num_rows = str(dest_num_rows) if dest_num_rows else '0'
+        logging.info(f'{source_num_rows, dest_num_rows}')
+        num_rows = ','.join([source_num_rows, dest_num_rows])
 
         self.sqlite_db.sqlite_oracle_table_column_table__insert({
             'owner': owner,
             'table_name': table_name,
             'columns': columns,
+            'num_rows': num_rows,
             'primarys': primarys,
             'primary_types': primary_types,
             'verify_percent': verify_percent
         })
 
-        logging.info(f'{owner, columns, primarys, primary_types}')
+        logging.info(
+            f'{owner, columns, num_rows, primarys, primary_types, verify_percent}')

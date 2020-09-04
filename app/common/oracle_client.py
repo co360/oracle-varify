@@ -205,6 +205,13 @@ class OracleDB:
         result = {item[0]: item[1] for item in column_list}
         return result
 
+    def get_oracle_table_num_rows(self, owner: str, table_name: str):
+        """ get oracle table num rows """
+        sql = self.sql_data["get_user_table_num_rows"]
+        sql = sql.format(owner=owner, table_name=table_name)
+        num_rows = [item[0] for item in self.cursor.execute(sql)][0]
+        return num_rows
+
     def get_user_objects(self, user, object_name):
         """ get common result objects """
         result = None
