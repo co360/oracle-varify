@@ -17,7 +17,7 @@ from app.controllers.get_oracle_table_primarykey import GetOracleTablePrimaryKey
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s: %(message)s')
 
 def init():
-    # collect_oracle_init()
+    collect_oracle_init()
     GetOracleTablePrimaryKey()
 
 if __name__ == '__main__':

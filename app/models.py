@@ -166,7 +166,8 @@ class SqliteDB:
                     table_name CHAR(100) NOT NULL,      
                     columns CHAR(200) NOT NULL,
                     primarys CHAR(100) NOT NULL,
-                    primary_types CHAR(100) NOT NULL)'''
+                    primary_types CHAR(100) NOT NULL,
+                    verify_percent CHAR(10) NOT NULL)'''
                        )
 
     def __get_table_name(self, table_name):
@@ -339,7 +340,8 @@ class SqliteDB:
             columns = data['columns']
             primarys = data['primarys']
             primary_types = data['primary_types']
-            sql = f'INSERT INTO {self.oracle_table_column} VALUES (NULL, "{owner}", "{table_name}", "{columns}", "{primarys}", "{primary_types}")'
+            verify_percent = data['verify_percent']
+            sql = f'INSERT INTO {self.oracle_table_column} VALUES (NULL, "{owner}", "{table_name}", "{columns}", "{primarys}", "{primary_types}", "{verify_percent}")'
             cursor.execute(sql)
 
     def sqlite_verify_object_statistic_query(self):
