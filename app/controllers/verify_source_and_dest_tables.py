@@ -43,7 +43,7 @@ class VerifySourceAndDestTables:
         for table in tables:
             pass
             # self.__analysis_target_table_data(table)
-        self.__analysis_target_table_data(tables[15])
+        self.__analysis_target_table_data(tables[2])
 
     def __get_table_max_rows(self, table_name: str, num_rows: str):
         """ get max_num """
@@ -103,18 +103,47 @@ class VerifySourceAndDestTables:
 
     def __format_table_query_sql(self, table_data: list, page: int):
         """ format table query sql """
+        owner = table_data[0]
         table_name = table_data[1]
         columns = table_data[2]
         primarys = table_data[-2]
-        primary_sql_asc_list = [f'{item} ASC' for item in primarys.split(',')]
+        primary_list = primarys.split(',')
+        primary_sql_asc_list = [f'{item} ASC' for item in primary_list]
         primary_sql_str = ','.join(primary_sql_asc_list)
+        primary_value_filter_sql = self.__assemble_primary_key_and_value_sql(
+            primary_list, [0]*len(primary_list))
         row_num_start = (page - 1) * self.default_per_page + 1
         row_num_end = page * self.default_per_page
-        sql = f'select {columns} from (SELECT tt.*, ROWNUM as rowno from (SELECT t.* from {table_name} t) tt where ROWNUM <= {row_num_end} ORDER BY {primary_sql_str} ) table_alise where table_alise.ROWNO >={row_num_start}'
-        logging.info(f'{sql}')
+        sql = f'select * from (select {columns} from {owner}.{table_name} where {primary_value_filter_sql} order by {primary_sql_str}) table_alise where rownum <=50;'
+        return sql
+
+    def __assemble_primary_key_and_value_sql(self, primary_list: list, value: list):
+        logging.info(f'{primary_list, value}')
+        """ assemble primary key value """
+        if len(primary_list) != len(value):
+            raise Exception("len primary_list and value is not equle")
+
+        primary_key_floor = []
+        for index, item in enumerate(primary_list, start=0):
+            cur_primary_key_floor = [f'({item} > {value[index]}']
+            logging.info(cur_primary_key_floor)
+            for front_index in range(0, index):
+                cur_primary_key_floor.append(
+                    f' AND {primary_list[front_index]} = {value[front_index]}')
+            cur_primary_key_floor.append(')')
+            cur_primary_sql = ''.join(cur_primary_key_floor)
+            primary_key_floor.append(cur_primary_sql)
+        primary_key_floor_sql = ' OR '.join(primary_key_floor)
+        logging.info(primary_key_floor_sql)
+        return primary_key_floor_sql
 
     def __query_oracle_table_order_by_primary(self, table_data: list,  page: int):
         """ query oracle table order by primary """
         table_name = table_data[1]
-        logging.info(f'========== {self.default_per_page, page, self.last_page_count}')
+        logging.info(
+            f'========== {self.default_per_page, page, self.last_page_count}')
         query_sql = self.__format_table_query_sql(table_data, page)
+        logging.info(f'{query_sql}')
+
+        # source_data = self.source_oracle_db.get_oracle_table_by_sql(query_sql)
+        # logging.info(source_data)
