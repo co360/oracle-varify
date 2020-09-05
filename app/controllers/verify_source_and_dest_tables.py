@@ -44,7 +44,7 @@ class VerifySourceAndDestTables:
         for table in tables:
             pass
             # self.__analysis_target_table_data(table)
-        self.__analysis_target_table_data(tables[11])
+        self.__analysis_target_table_data(tables[1])
 
     def __get_table_max_rows(self, table_name: str, num_rows: str):
         """ get max_num """
@@ -131,7 +131,6 @@ class VerifySourceAndDestTables:
         for index, item in enumerate(primary_list, start=0):
             cur_primary_key_floor = [
                 f'({item} > {self.cur_primary_value[index]}']
-            logging.info(cur_primary_key_floor)
             for front_index in range(0, index):
                 cur_primary_key_floor.append(
                     f' AND {primary_list[front_index]} = {self.cur_primary_value[front_index]}')
@@ -159,7 +158,7 @@ class VerifySourceAndDestTables:
         elif len(source) and not len(dest):
             for index, key in enumerate(primary_key_index, start=0):
                 primary_index = primary_key_index[key]
-                self.cur_primary_value[index] = f"'source[primary_index]'"
+                self.cur_primary_value[index] = f"'{source[primary_index]}'"
         else:
             raise Exception(f'valid source {source} and dest {dest}')
         logging.info(f'cur primary value is {self.cur_primary_value}')
@@ -181,21 +180,31 @@ class VerifySourceAndDestTables:
                 result[item] = columns.index(item)
         return result
 
-    def __query_oracle_table_order_by_primary(self, table_data: list,  page: int):
-        """ query oracle table order by primary """
-        table_name = table_data[1]
+    def __source_dest_last_row_compare(self, table_data: list, source: list, dest: list):
+        """ compare source and dest last row data """
+        logging.info('start compare last row...')
         columns = table_data[2].split(',')
         primarykey_list = table_data[-2].split(',')
+        primary_key_index = self.__get_primary_key_index(
+            primarykey_list, columns)
+        source_last_data = self.__get_oracle_table_last_row(source)
+        dest_last_data = self.__get_oracle_table_last_row(dest)
+
+        self.__update_cur_primary_value(
+            source_last_data, dest_last_data, primary_key_index)
+
+    def __source_dest_data_compare(self, table_data:list, source, dest):
+        """ compare source, dest data """
+        logging.info('start compare source data and dest data')
+        pass
+
+    def __query_oracle_table_order_by_primary(self, table_data: list,  page: int):
+        """ query oracle table order by primary """
         query_sql = self.__format_table_query_sql(table_data, page)
         logging.info(f'{query_sql}')
 
         source_data = self.source_oracle_db.get_oracle_table_by_sql(query_sql)
         dest_data = self.dest_oracle_db.get_oracle_table_by_sql(query_sql)
         logging.info(source_data)
-        source_last_data = self.__get_oracle_table_last_row(source_data)
-        primary_key_index = self.__get_primary_key_index(
-            primarykey_list, columns)
-        dest_last_data = self.__get_oracle_table_last_row(dest_data)
-
-        self.__update_cur_primary_value(
-            source_last_data, dest_last_data, primary_key_index)
+        self.__source_dest_last_row_compare(table_data, source_data, dest_data)
+        self.__source_dest_data_compare(table_data, source_data, dest_data)
