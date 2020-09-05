@@ -17,7 +17,7 @@ class VerifySourceAndDestTables:
     def __table_data_config(self):
         """ config table data """
         logging.info('Start get Table primary key')
-        self.default_per_page = 20
+        self.default_per_page = 4
         self.last_page_count = 0
         self.cur_primary_value = ''
         # self.sqlite_db.oracle_verify_source_dest_tables_drop()
@@ -44,7 +44,7 @@ class VerifySourceAndDestTables:
         for table in tables:
             pass
             # self.__analysis_target_table_data(table)
-        self.__analysis_target_table_data(tables[2])
+        self.__analysis_target_table_data(tables[11])
 
     def __get_table_max_rows(self, table_name: str, num_rows: str):
         """ get max_num """
@@ -116,9 +116,8 @@ class VerifySourceAndDestTables:
             self.cur_primary_value = ["'0'"]*len(primary_list)
         primary_value_filter_sql = self.__assemble_primary_key_and_value_sql(
             primary_list)
-        row_num_start = (page - 1) * self.default_per_page + 1
-        row_num_end = page * self.default_per_page
-        sql = f'select * from (select {columns} from {owner}.{table_name} where {primary_value_filter_sql} order by {primary_sql_str}) table_alise where rownum <=50;'
+
+        sql = f'select * from (select {columns} from {owner}.{table_name} where {primary_value_filter_sql} order by {primary_sql_str}) table_alise where rownum <={self.default_per_page}'
         return sql
 
     def __assemble_primary_key_and_value_sql(self, primary_list: list):
@@ -143,6 +142,10 @@ class VerifySourceAndDestTables:
         logging.info(primary_key_floor_sql)
         return primary_key_floor_sql
 
+    def __update_cur_primary_value(self, source, dest, primary_list):
+        """ get little primary value """
+        pass
+
     def __query_oracle_table_order_by_primary(self, table_data: list,  page: int):
         """ query oracle table order by primary """
         table_name = table_data[1]
@@ -151,5 +154,5 @@ class VerifySourceAndDestTables:
         query_sql = self.__format_table_query_sql(table_data, page)
         logging.info(f'{query_sql}')
 
-        # source_data = self.source_oracle_db.get_oracle_table_by_sql(query_sql)
-        # logging.info(source_data)
+        source_data = self.source_oracle_db.get_oracle_table_by_sql(query_sql)
+        logging.info(source_data)
