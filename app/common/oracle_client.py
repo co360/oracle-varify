@@ -212,6 +212,11 @@ class OracleDB:
         num_rows = [item[0] for item in self.cursor.execute(sql)][0]
         return num_rows
 
+    def get_oracle_table_by_sql(self, sql):
+        """ use sql string query oracle table """
+        result = [item for item in self.cursor.execute(sql)]
+        return result
+
     def get_user_objects(self, user, object_name):
         """ get common result objects """
         result = None
