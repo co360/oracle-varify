@@ -19,6 +19,7 @@ class VerifySourceAndDestTables:
         logging.info('Start get Table primary key')
         self.default_per_page = 20
         self.last_page_count = 0
+        self.cur_primary_value = ''
         # self.sqlite_db.oracle_verify_source_dest_tables_drop()
         # self.sqlite_db.oracle_verify_source_dest_tables_create()
         self.source_oracle_db = self.__oracle_login_init('source')
@@ -110,26 +111,31 @@ class VerifySourceAndDestTables:
         primary_list = primarys.split(',')
         primary_sql_asc_list = [f'{item} ASC' for item in primary_list]
         primary_sql_str = ','.join(primary_sql_asc_list)
+        if page == 1:
+            logging.info('first page, default ""')
+            self.cur_primary_value = ["'0'"]*len(primary_list)
         primary_value_filter_sql = self.__assemble_primary_key_and_value_sql(
-            primary_list, [0]*len(primary_list))
+            primary_list)
         row_num_start = (page - 1) * self.default_per_page + 1
         row_num_end = page * self.default_per_page
         sql = f'select * from (select {columns} from {owner}.{table_name} where {primary_value_filter_sql} order by {primary_sql_str}) table_alise where rownum <=50;'
         return sql
 
-    def __assemble_primary_key_and_value_sql(self, primary_list: list, value: list):
-        logging.info(f'{primary_list, value}')
+    def __assemble_primary_key_and_value_sql(self, primary_list: list):
+        logging.info(f'{primary_list, self.cur_primary_value}')
         """ assemble primary key value """
-        if len(primary_list) != len(value):
+
+        if len(primary_list) != len(self.cur_primary_value):
             raise Exception("len primary_list and value is not equle")
 
         primary_key_floor = []
         for index, item in enumerate(primary_list, start=0):
-            cur_primary_key_floor = [f'({item} > {value[index]}']
+            cur_primary_key_floor = [
+                f'({item} > {self.cur_primary_value[index]}']
             logging.info(cur_primary_key_floor)
             for front_index in range(0, index):
                 cur_primary_key_floor.append(
-                    f' AND {primary_list[front_index]} = {value[front_index]}')
+                    f' AND {primary_list[front_index]} = {self.cur_primary_value[front_index]}')
             cur_primary_key_floor.append(')')
             cur_primary_sql = ''.join(cur_primary_key_floor)
             primary_key_floor.append(cur_primary_sql)
