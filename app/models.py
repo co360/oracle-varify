@@ -206,7 +206,8 @@ class SqliteDB:
                     page INTEGER NOT NULL,
                     per_page INTEGER NOT NULL,
                     primary_value_ceil TEXT NOT NULL,
-                    primary_value_floor TEXT NOT NULL)'''
+                    primary_value_floor TEXT NOT NULL,
+                    verify_status CHAR(10) NOT NULL)'''
                        )
 
     def __get_table_name(self, table_name):
@@ -414,7 +415,8 @@ class SqliteDB:
             per_page = data['per_page']
             primary_value_ceil = data['primary_value_ceil']
             primary_value_floor = data['primary_value_floor']
-            sql = f'INSERT INTO {self.oracle_table_data_verify} VALUES (NULL, "{owner}", "{table_name}", "{datetime}", "{page}", "{per_page}", "{primary_value_ceil}", "{primary_value_floor}")'
+            verify_status = data['verify_status']
+            sql = f'INSERT INTO {self.oracle_table_foreach_query} VALUES (NULL, "{owner}", "{table_name}", "{datetime}", "{page}", "{per_page}", "{primary_value_ceil}", "{primary_value_floor}", "{verify_status}")'
             cursor.execute(sql)
 
     def sqlite_verify_object_statistic_query(self):

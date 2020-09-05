@@ -1,9 +1,11 @@
 import os
 import math
 import logging
+import datetime
 from ..common.oracle_client import OracleDB
 from ..models import SqliteDB
 from ..common.common import get_data_from_oracle_config_ini
+from ..common.common import varify_data_use_md5
 
 
 class VerifySourceAndDestTables:
@@ -19,9 +21,10 @@ class VerifySourceAndDestTables:
         logging.info('Start get Table primary key')
         self.default_per_page = 4
         self.last_page_count = 0
-        self.cur_primary_value = ''
-        # self.sqlite_db.oracle_verify_source_dest_tables_drop()
-        # self.sqlite_db.oracle_verify_source_dest_tables_create()
+        self.primary_value_floor = ''
+        self.primary_value_ceil = ''
+        self.sqlite_db.oracle_verify_source_dest_tables_drop()
+        self.sqlite_db.oracle_verify_source_dest_tables_create()
         self.source_oracle_db = self.__oracle_login_init('source')
         self.dest_oracle_db = self.__oracle_login_init('dest')
 
@@ -113,7 +116,8 @@ class VerifySourceAndDestTables:
         primary_sql_str = ','.join(primary_sql_asc_list)
         if page == 1:
             logging.info('first page, default ""')
-            self.cur_primary_value = ["'0'"]*len(primary_list)
+            self.primary_value_floor = ["'0'"]*len(primary_list)
+            self.primary_value_ceil = ["'0'"]*len(primary_list)
         primary_value_filter_sql = self.__assemble_primary_key_and_value_sql(
             primary_list)
 
@@ -121,19 +125,22 @@ class VerifySourceAndDestTables:
         return sql
 
     def __assemble_primary_key_and_value_sql(self, primary_list: list):
-        logging.info(f'{primary_list, self.cur_primary_value}')
-        """ assemble primary key value """
+        logging.info(f'{primary_list, self.primary_value_ceil}')
+        """ 
+        assemble primary key value 
+        every query use last primary value ceil as cur primary floor
+        """
 
-        if len(primary_list) != len(self.cur_primary_value):
+        if len(primary_list) != len(self.primary_value_ceil):
             raise Exception("len primary_list and value is not equle")
 
         primary_key_floor = []
         for index, item in enumerate(primary_list, start=0):
             cur_primary_key_floor = [
-                f'({item} > {self.cur_primary_value[index]}']
+                f'({item} > {self.primary_value_ceil[index]}']
             for front_index in range(0, index):
                 cur_primary_key_floor.append(
-                    f' AND {primary_list[front_index]} = {self.cur_primary_value[front_index]}')
+                    f' AND {primary_list[front_index]} = {self.primary_value_ceil[front_index]}')
             cur_primary_key_floor.append(')')
             cur_primary_sql = ''.join(cur_primary_key_floor)
             primary_key_floor.append(cur_primary_sql)
@@ -141,27 +148,30 @@ class VerifySourceAndDestTables:
         logging.info(primary_key_floor_sql)
         return primary_key_floor_sql
 
-    def __update_cur_primary_value(self, source: list, dest: list, primary_key_index: dict):
+    def __update_primary_value_ceil(self, source: list, dest: list, primary_key_index: dict):
         """ get little primary value """
         logging.info(f'{source, dest, primary_key_index}')
+        self.primary_value_floor = self.primary_value_ceil
+
         if len(source) and len(dest):
             for index, key in enumerate(primary_key_index, start=0):
                 primary_index = primary_key_index[key]
                 source_data = source[primary_index]
                 dest_data = dest[primary_index]
                 little_primary_value = source_data if source_data > dest_data else dest_data
-                self.cur_primary_value[index] = f"'{little_primary_value}'"
+                self.primary_value_ceil[index] = f"'{little_primary_value}'"
         elif not len(source) and len(dest):
             for index, key in enumerate(primary_key_index, start=0):
                 primary_index = primary_key_index[key]
-                self.cur_primary_value[index] = f"'{dest[primary_index]}'"
+                self.primary_value_ceil[index] = f"'{dest[primary_index]}'"
         elif len(source) and not len(dest):
             for index, key in enumerate(primary_key_index, start=0):
                 primary_index = primary_key_index[key]
-                self.cur_primary_value[index] = f"'{source[primary_index]}'"
+                self.primary_value_ceil[index] = f"'{source[primary_index]}'"
         else:
             raise Exception(f'valid source {source} and dest {dest}')
-        logging.info(f'cur primary value is {self.cur_primary_value}')
+        logging.info(
+            f'cur primary value is {self.primary_value_floor, self.primary_value_ceil}')
 
     def __get_oracle_table_last_row(self, table_data: list):
         """ get last row table data """
@@ -190,13 +200,49 @@ class VerifySourceAndDestTables:
         source_last_data = self.__get_oracle_table_last_row(source)
         dest_last_data = self.__get_oracle_table_last_row(dest)
 
-        self.__update_cur_primary_value(
+        self.__update_primary_value_ceil(
             source_last_data, dest_last_data, primary_key_index)
 
-    def __source_dest_data_compare(self, table_data:list, source, dest):
+    def __source_dest_data_compare(self, table_data: list, source: list, dest: list, page: int):
         """ compare source, dest data """
         logging.info('start compare source data and dest data')
-        pass
+        logging.info(f'source {source}, dest {dest}')
+        status = varify_data_use_md5(source, dest)
+        if status:
+            logging.info(f'{table_data[1]} compare ok')
+        else:
+            logging.error(f'{table_data[1]} compare error')
+        self.__update_table_foreach_query(table_data, page, status)
+
+    def __del_quota_mark_from_primary_value(self, primary_value: list):
+        """
+        delete quota mark from primary value 
+        currend mysql query don't need
+        """
+        primary_str = ','.join(primary_value)
+        result = primary_str.replace("'", '')
+        return result
+
+    def __update_table_foreach_query(self, table_data, page, verify_status):
+        """ update foreach table every query info """
+
+        primary_value_ceil = self.__del_quota_mark_from_primary_value(
+            self.primary_value_ceil)
+        primary_value_floor = self.__del_quota_mark_from_primary_value(
+            self.primary_value_floor)
+        result = {
+            'owner': table_data[0],
+            'table_name': table_data[1],
+            'page': page,
+            'datetime': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'per_page': self.default_per_page,
+            'primary_value_ceil': primary_value_ceil,
+            'primary_value_floor': primary_value_floor,
+            'verify_status': verify_status
+        }
+        logging.info(result)
+
+        self.sqlite_db.sqlite_oracle_table_foreach_query_insert(result)
 
     def __query_oracle_table_order_by_primary(self, table_data: list,  page: int):
         """ query oracle table order by primary """
@@ -207,4 +253,5 @@ class VerifySourceAndDestTables:
         dest_data = self.dest_oracle_db.get_oracle_table_by_sql(query_sql)
         logging.info(source_data)
         self.__source_dest_last_row_compare(table_data, source_data, dest_data)
-        self.__source_dest_data_compare(table_data, source_data, dest_data)
+        self.__source_dest_data_compare(
+            table_data, source_data, dest_data, page)
