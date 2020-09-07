@@ -148,36 +148,48 @@ class VerifySourceAndDestTables:
         logging.info(primary_key_floor_sql)
         return primary_key_floor_sql
 
-    def __update_primary_value_ceil(self, source: list, dest: list, primary_key_index: dict):
+    def __update_primary_value_ceil_or_floor(self, source: list, dest: list, primary_key_index: dict, type: str):
         """ get little primary value """
         logging.info(f'{source, dest, primary_key_index}')
-        self.primary_value_floor = self.primary_value_ceil
+        if type == 'ceil':
+            primary_value = self.primary_value_ceil
+        elif type == 'floor':
+            primary_value = self.primary_value_floor
 
         if len(source) and len(dest):
             for index, key in enumerate(primary_key_index, start=0):
                 primary_index = primary_key_index[key]
                 source_data = source[primary_index]
                 dest_data = dest[primary_index]
-                little_primary_value = source_data if source_data > dest_data else dest_data
-                self.primary_value_ceil[index] = f"'{little_primary_value}'"
+                little_primary_value = source_data if source_data < dest_data else dest_data
+                primary_value[index] = f"'{little_primary_value}'"
         elif not len(source) and len(dest):
             for index, key in enumerate(primary_key_index, start=0):
                 primary_index = primary_key_index[key]
-                self.primary_value_ceil[index] = f"'{dest[primary_index]}'"
+                primary_value[index] = f"'{dest[primary_index]}'"
         elif len(source) and not len(dest):
             for index, key in enumerate(primary_key_index, start=0):
                 primary_index = primary_key_index[key]
-                self.primary_value_ceil[index] = f"'{source[primary_index]}'"
+                primary_value[index] = f"'{source[primary_index]}'"
         else:
             raise Exception(f'valid source {source} and dest {dest}')
-        logging.info(
-            f'cur primary value is {self.primary_value_floor, self.primary_value_ceil}')
 
-    def __get_oracle_table_last_row(self, table_data: list):
-        """ get last row table data """
+        if type == 'ceil':
+            self.primary_value_ceil = primary_value
+        elif type == 'floor':
+            self.primary_key_floor = primary_value
+
+        logging.info(
+            f'cur primary value {type} {self.primary_value_floor, self.primary_value_ceil}')
+
+    def __get_oracle_table_first_or_last_row(self, table_data: list, type: str):
+        """ get first or last row table data """
         result = []
         if len(table_data):
-            result = table_data[-1]
+            if type == 'last':
+                result = table_data[-1]
+            elif type == 'first':
+                result = table_data[0]
         return result
 
     def __get_primary_key_index(self, primary_list: list, columns: list):
@@ -197,11 +209,19 @@ class VerifySourceAndDestTables:
         primarykey_list = table_data[-2].split(',')
         primary_key_index = self.__get_primary_key_index(
             primarykey_list, columns)
-        source_last_data = self.__get_oracle_table_last_row(source)
-        dest_last_data = self.__get_oracle_table_last_row(dest)
+        source_last_data = self.__get_oracle_table_first_or_last_row(
+            source, 'last')
+        dest_last_data = self.__get_oracle_table_first_or_last_row(
+            dest, 'last')
+        source_first_data = self.__get_oracle_table_first_or_last_row(
+            source, 'first')
+        dest_first_data = self.__get_oracle_table_first_or_last_row(
+            dest, 'first')
 
-        self.__update_primary_value_ceil(
-            source_last_data, dest_last_data, primary_key_index)
+        self.__update_primary_value_ceil_or_floor(
+            source_last_data, dest_last_data, primary_key_index, 'ceil')
+        self.__update_primary_value_ceil_or_floor(
+            source_first_data, dest_last_data, primary_key_index, 'floor')
 
     def __source_dest_data_compare(self, table_data: list, source: list, dest: list, page: int):
         """ compare source, dest data """
