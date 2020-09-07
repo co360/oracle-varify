@@ -232,19 +232,36 @@ class VerifySourceAndDestTables:
         status = varify_data_use_md5(source, dest)
         if status:
             logging.info(f'{table_name} compare ok')
+            self.__oracle_table_block_verify_ok_insert(
+                owner, table_name, source, page)
         else:
             logging.error(f'{table_name} compare error')
         self.__update_table_foreach_query(owner, table_name, page, status)
 
-    def __oracle_table_block_verify_ok_insert(self, table_data, source, page):
+    def __oracle_table_block_verify_ok_insert(self, owner: str, table_name: str, table_data: list, page: int):
         """ oracle block table data compare equal """
-        for index in range(0, self.default_per_page):
+        for item in table_data:
+            primary_value = self.__get_primary_value_from_table_data(item)
             result = {
-
+                'owner': owner,
+                'table_name': table_name,
+                'source_primary_value': primary_value,
+                'dest_primary_value': primary_value,
+                'verify_status': str(True),
+                'page': page,
             }
 
-        for index in range(0, self.default_per_page):
-            pass
+            self.sqlite_db.sqlite_oracle_table_data_verify_insert(result)
+            logging.info(f'INsert into oracle table data verify {result} ok')
+
+    def __get_primary_value_from_table_data(self, data: list):
+        """ use primary key list get column primary value """
+        result = []
+        for primary_key, primary_index in self.primary_key_index.items():
+            result.append(str(data[primary_index]))
+        primary_value_str = ','.join(result)
+        logging.info(f'Primary value is {primary_value_str}')
+        return primary_value_str
 
     def __del_quota_mark_from_primary_value(self, primary_value: list):
         """
