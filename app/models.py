@@ -191,6 +191,7 @@ class SqliteDB:
                     table_name CHAR(100) NOT NULL,      
                     source_primary_value TEXT NOT NULL,
                     dest_primary_value TEXT NOT NULL,
+                    page INTEGER NOT NULL,
                     verify_status CHAR(10) NOT NULL)'''
                        )
 
@@ -392,7 +393,7 @@ class SqliteDB:
             sql = f'INSERT INTO {self.oracle_table_column} VALUES (NULL, "{owner}", "{table_name}", "{columns}", "{num_rows}", "{primarys}", "{primary_types}", "{verify_percent}")'
             cursor.execute(sql)
 
-    def sqlite_oracle_table_data_verify__insert(self, data):
+    def sqlite_oracle_table_data_verify_insert(self, data):
         """ insert oracle table data verify column data """
         with sqlite3.connect(self.db) as connection:
             cursor = connection.cursor()
@@ -401,7 +402,8 @@ class SqliteDB:
             source_primary_value = data['source_primary_value']
             dest_primary_value = data['dest_primary_value']
             verify_status = data['verify_status']
-            sql = f'INSERT INTO {self.oracle_table_data_verify} VALUES (NULL, "{owner}", "{table_name}", "{source_primary_value}", "{dest_primary_value}", "{verify_status}")'
+            page = data['page']
+            sql = f'INSERT INTO {self.oracle_table_data_verify} VALUES (NULL, "{owner}", "{table_name}", "{source_primary_value}", "{dest_primary_value}", "{page}", "{verify_status}")'
             cursor.execute(sql)
 
     def sqlite_oracle_table_foreach_query_insert(self, data):
