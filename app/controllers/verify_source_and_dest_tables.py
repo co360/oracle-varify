@@ -130,7 +130,7 @@ class VerifySourceAndDestTables:
         assemble primary key value 
         every query use last primary value ceil as cur primary floor
         """
-        primary_keys = self.primary_key_index.keys()
+        primary_keys = list(self.primary_key_index.keys())
         logging.info(f'{primary_keys, self.primary_value_ceil}')
 
         if len(primary_keys) != len(self.primary_value_ceil):

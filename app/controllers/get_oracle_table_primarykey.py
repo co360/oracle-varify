@@ -88,6 +88,36 @@ class GetOracleTablePrimaryKey:
 
     def __get_table_num_rows(self, owner: str, table_name: str):
         """ get table rows """
+        source_num_rows = self.source_oracle_db.get_oracle_table_num_rows(
+            owner, table_name)
+        source_num_rows = str(source_num_rows) if source_num_rows else '0'
+        dest_num_rows = self.dest_oracle_db.get_oracle_table_num_rows(
+            owner, table_name)
+        dest_num_rows = str(dest_num_rows) if dest_num_rows else '0'
+        logging.info(f'{source_num_rows, dest_num_rows}')
+        num_rows = ','.join([source_num_rows, dest_num_rows])
+        return num_rows
+
+    def __check_table_primary_key_and_type(self, primary_keys: list, primary_types: list):
+        """ 
+        check primary key types by no_verify_primary_key_type 
+        return True or False
+        """
+        no_verify_primary = self.config_dvt['no_verify_primary_key_type']
+        if not bool(no_verify_primary):
+            return True
+        else:
+            no_verify_primary = no_verify_primary.upper()
+
+            for filter_primary_type in no_verify_primary.split(','):
+                if filter_primary_type in primary_types:
+                    index = primary_types.index(filter_primary_type)
+                    primary_keys.pop(index)
+
+            if not bool(primary_keys):
+                return False
+            else:
+                return True
 
     def __get_table_columns(self, owner: str, table_name: str, primary_keys: list):
         """ get table column """
@@ -95,28 +125,28 @@ class GetOracleTablePrimaryKey:
             owner, table_name)
         self.__filter_table_column(table_column)
         columns = ','.join(table_column.keys())
-        primarys = ','.join(primary_keys)
         primary_type_list = [table_column[item] for item in primary_keys]
-        primary_types = ','.join(primary_type_list)
         verify_percent = self.__get_verify_percent(table_name)
-        source_num_rows = self.source_oracle_db.get_oracle_table_num_rows(
-            owner, table_name)
-        source_num_rows = str(source_num_rows) if source_num_rows else '0'
-        dest_num_rows = self.source_oracle_db.get_oracle_table_num_rows(
-            owner, table_name)
-        dest_num_rows = str(dest_num_rows) if dest_num_rows else '0'
-        logging.info(f'{source_num_rows, dest_num_rows}')
-        num_rows = ','.join([source_num_rows, dest_num_rows])
+        num_rows = self.__get_table_num_rows(owner, table_name)
+        status = self.__check_table_primary_key_and_type(
+            primary_keys, primary_type_list)
 
-        self.sqlite_db.sqlite_oracle_table_column_table__insert({
-            'owner': owner,
-            'table_name': table_name,
-            'columns': columns,
-            'num_rows': num_rows,
-            'primarys': primarys,
-            'primary_types': primary_types,
-            'verify_percent': verify_percent
-        })
+        if status:
+            primarys = ','.join(primary_keys)
+            primary_types = ','.join(primary_type_list)
 
-        logging.info(
-            f'{owner, columns, num_rows, primarys, primary_types, verify_percent}')
+            self.sqlite_db.sqlite_oracle_table_column_table__insert({
+                'owner': owner,
+                'table_name': table_name,
+                'columns': columns,
+                'num_rows': num_rows,
+                'primarys': primarys,
+                'primary_types': primary_types,
+                'verify_percent': verify_percent
+            })
+
+            logging.info(
+                f'{owner, columns, num_rows, primarys, primary_types, verify_percent}')
+        else:
+            logging.error(
+                f'owner {owner} table name {table_name} not check by primary type')
